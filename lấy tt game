@@ -1,35 +1,64 @@
 -- ==========================================
--- SCRIPT LẤY THÔNG TIN GAME ROBLOX (GUI) - V2.0
+-- GAME INFO COLLECTOR v2.2 (Có dòng TikTok)
 -- Hỗ trợ: Xeno, Delta, Synapse, Solara, Codex
--- Tương thích: PC + Mobile
 -- ==========================================
 
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local HttpService = game:GetService("HttpService")
-local MarketplaceService = game:GetService("MarketplaceService")
-local Lighting = game:GetService("Lighting")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local CollectionService = game:GetService("CollectionService")
-local SoundService = game:GetService("SoundService")
-local StarterGui = game:GetService("StarterGui")
-local StarterPack = game:GetService("StarterPack")
+print("🚀 [GameInfo] Bắt đầu tải script...")
+
+-- Bọc pcall để không bị crash
+local function safeGet(serviceName)
+    local ok, s = pcall(function() return game:GetService(serviceName) end)
+    if ok then return s end
+    return nil
+end
+
+local Players = safeGet("Players")
+local Workspace = safeGet("Workspace")
+local ReplicatedStorage = safeGet("ReplicatedStorage")
+local HttpService = safeGet("HttpService")
+local MarketplaceService = safeGet("MarketplaceService")
+local Lighting = safeGet("Lighting")
+local RunService = safeGet("RunService")
+local UserInputService = safeGet("UserInputService")
+local CollectionService = safeGet("CollectionService")
+local StarterPack = safeGet("StarterPack")
 
 local Player = Players.LocalPlayer
 
+print("✅ [GameInfo] Đã lấy services")
+
 -- ==========================================
--- TẠO GUI CHÍNH
+-- TẠO GUI
 -- ==========================================
 local gui = Instance.new("ScreenGui")
-gui.Name = "GameInfoGuiV2"
+gui.Name = "GameInfoGuiV22"
 gui.ResetOnSpawn = false
-if gethui then gui.Parent = gethui() else gui.Parent = Player:WaitForChild("PlayerGui") end
 
+-- Fallback an toàn cho gethui
+local parented = false
+if gethui then
+    local ok = pcall(function() gui.Parent = gethui() end)
+    if ok then parented = true end
+end
+if not parented then
+    local pg = Player:FindFirstChild("PlayerGui")
+    if not pg then
+        pg = Player:WaitForChild("PlayerGui", 10)
+    end
+    if pg then gui.Parent = pg end
+end
+
+if not gui.Parent then
+    warn("❌ Không thể gắn GUI vào PlayerGui!")
+    return
+end
+
+print("✅ [GameInfo] GUI đã tạo")
+
+-- Khung chính (đã tăng chiều cao 20px để chứa dòng credit)
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 720, 0, 440)
-main.Position = UDim2.new(0.5, -360, 0.5, -220)
+main.Size = UDim2.new(0, 720, 0, 460)
+main.Position = UDim2.new(0.5, -360, 0.5, -230)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 main.BorderColor3 = Color3.fromRGB(0, 200, 255)
 main.BorderSizePixel = 3
@@ -37,8 +66,9 @@ main.Active = true
 main.Draggable = true
 main.Parent = gui
 
+-- Tiêu đề
 local title = Instance.new("TextLabel")
-title.Text = "📊  GAME INFO COLLECTOR  v2.0"
+title.Text = "📊  GAME INFO COLLECTOR  v2.2"
 title.Size = UDim2.new(1, 0, 0, 40)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundColor3 = Color3.fromRGB(0, 100, 150)
@@ -47,23 +77,34 @@ title.TextScaled = true
 title.Font = Enum.Font.GothamBold
 title.Parent = main
 
+-- ⭐ DÒNG CREDIT TIKTOK ⭐
+local creditLabel = Instance.new("TextLabel")
+creditLabel.Text = "📱 GUI tại TikTok: matcuoi290"
+creditLabel.Size = UDim2.new(1, 0, 0, 22)
+creditLabel.Position = UDim2.new(0, 0, 0, 40)
+creditLabel.BackgroundColor3 = Color3.fromRGB(30, 60, 80)
+creditLabel.TextColor3 = Color3.fromRGB(0, 255, 200)
+creditLabel.TextScaled = true
+creditLabel.Font = Enum.Font.GothamBold
+creditLabel.Parent = main
+
+-- Nút đóng (đặt đè lên cả title + credit)
 local closeBtn = Instance.new("TextButton")
 closeBtn.Text = "✕"
-closeBtn.Size = UDim2.new(0, 40, 0, 40)
-closeBtn.Position = UDim2.new(1, -40, 0, 0)
+closeBtn.Size = UDim2.new(0, 60, 0, 62)
+closeBtn.Position = UDim2.new(1, -60, 0, 0)
 closeBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.TextSize = 22
 closeBtn.Font = Enum.Font.GothamBold
+closeBtn.ZIndex = 5
 closeBtn.Parent = main
 closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 
--- ==========================================
--- CỘT TRÁI: NÚT
--- ==========================================
+-- Cột trái (vị trí y=65 thay vì 45 để tránh đè credit)
 local leftPanel = Instance.new("Frame")
-leftPanel.Size = UDim2.new(0, 210, 1, -50)
-leftPanel.Position = UDim2.new(0, 5, 0, 45)
+leftPanel.Size = UDim2.new(0, 210, 1, -70)
+leftPanel.Position = UDim2.new(0, 5, 0, 65)
 leftPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
 leftPanel.BorderSizePixel = 0
 leftPanel.Parent = main
@@ -99,12 +140,10 @@ statusLabel.TextWrapped = true
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.Parent = leftPanel
 
--- ==========================================
--- CỘT PHẢI: KHUNG THÔNG TIN
--- ==========================================
+-- Cột phải (vị trí y=65)
 local rightPanel = Instance.new("Frame")
-rightPanel.Size = UDim2.new(1, -230, 1, -50)
-rightPanel.Position = UDim2.new(0, 220, 0, 45)
+rightPanel.Size = UDim2.new(1, -230, 1, -70)
+rightPanel.Position = UDim2.new(0, 220, 0, 65)
 rightPanel.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
 rightPanel.BorderSizePixel = 0
 rightPanel.Parent = main
@@ -139,7 +178,6 @@ local function addLine(text, color)
     line.LayoutOrder = lineCount
     line.Parent = infoScroll
     infoScroll.CanvasSize = UDim2.new(0, 0, 0, lineCount * 23 + 10)
-    infoScroll.CanvasPosition = Vector2.new(0, infoScroll.AbsoluteCanvasSize.Y)
 end
 
 local function clearLines()
@@ -151,7 +189,7 @@ local function clearLines()
 end
 
 -- ==========================================
--- HÀM LẤY THÔNG TIN CHÍNH (NÂNG CẤP)
+-- HÀM LẤY THÔNG TIN
 -- ==========================================
 local gameInfoText = ""
 
@@ -164,7 +202,7 @@ local function collectGameInfo()
     saveBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
 
     local function addToText(str) gameInfoText = gameInfoText .. str .. "\n" end
-    local function section(t) 
+    local function section(t)
         addLine("═════ " .. t .. " ═════", Color3.fromRGB(0, 200, 255))
         addToText("═══════════ " .. t .. " ═══════════")
     end
@@ -173,120 +211,123 @@ local function collectGameInfo()
         addToText(k .. ": " .. tostring(v))
     end
 
-    -- ===== 1. THÔNG TIN GAME =====
+    -- Thêm info GUI vào phần xuất
+    addToText("📱 GUI tại TikTok: matcuoi290")
+    addToText("")
+
+    -- 1. GAME
     section("1. THÔNG TIN GAME")
-    task.wait(0.1)
     local gameName = "Không rõ"
-    pcall(function() gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name end)
+    pcall(function()
+        gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+    end)
     line("Tên game", gameName)
     line("Place ID", game.PlaceId)
     line("Job ID", game.JobId)
     line("Creator ID", game.CreatorId)
     line("Creator Type", tostring(game.CreatorType))
-    line("Vi phạm", tostring(game.PlaceVersion))
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 2. NGƯỜI CHƠI HIỆN TẠI =====
+    -- 2. NGƯỜI CHƠI
     section("2. NGƯỜI CHƠI HIỆN TẠI")
-    task.wait(0.1)
     line("Username", Player.Name)
     line("Display Name", Player.DisplayName)
     line("User ID", Player.UserId)
     line("Tuổi tài khoản", Player.AccountAge .. " ngày")
-    line("Loại tài khoản", tostring(Player.MembershipType))
     if Player.Character then
         local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
             local p = hrp.Position
-            line("Tọa độ người chơi", string.format("X=%.1f, Y=%.1f, Z=%.1f", p.X, p.Y, p.Z))
+            line("Tọa độ", string.format("X=%.1f, Y=%.1f, Z=%.1f", p.X, p.Y, p.Z))
         end
         local hum = Player.Character:FindFirstChildOfClass("Humanoid")
         if hum then
             line("WalkSpeed", hum.WalkSpeed)
             line("JumpPower", hum.JumpPower)
-            line("Health", hum.Health .. "/" .. hum.MaxHealth)
-            line("Trạng thái", tostring(hum:GetState()))
+            line("Máu", hum.Health .. "/" .. hum.MaxHealth)
         end
     end
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 3. SERVER =====
-    section("3. THÔNG TIN SERVER")
-    task.wait(0.1)
-    line("Số người chơi", #Players:GetPlayers() .. "/" .. Players.MaxPlayers)
-    line("Ping", math.floor(Player:GetNetworkPing() * 1000) .. " ms")
-    line("Uptime", math.floor(Workspace.DistributedGameTime) .. " giây")
-    line("FPS (ước tính)", math.floor(1 / RunService.RenderStepped:Wait()) .. " FPS")
-    task.wait(0.1)
+    -- 3. SERVER
+    section("3. SERVER")
+    pcall(function()
+        line("Số người chơi", #Players:GetPlayers() .. "/" .. Players.MaxPlayers)
+    end)
+    pcall(function()
+        line("Ping", math.floor(Player:GetNetworkPing() * 1000) .. " ms")
+    end)
+    pcall(function()
+        line("Uptime", math.floor(Workspace.DistributedGameTime) .. " giây")
+    end)
+    pcall(function()
+        local t0 = tick()
+        RunService.Heartbeat:Wait()
+        local dt = tick() - t0
+        if dt > 0 then
+            line("FPS (ước tính)", math.floor(1 / dt) .. " FPS")
+        end
+    end)
+    task.wait(0.05)
 
-    -- Danh sách người chơi có toạ độ
-    addLine("── Chi tiết người chơi ──", Color3.fromRGB(200, 200, 100))
-    addToText("── Chi tiết người chơi ──")
-    for i, plr in ipairs(Players:GetPlayers()) do
+    -- Danh sách người chơi
+    addLine("── Danh sách người chơi ──", Color3.fromRGB(200, 200, 100))
+    addToText("── Danh sách người chơi ──")
+    local players = Players:GetPlayers()
+    for i, plr in ipairs(players) do
         local tag = (plr == Player) and " (BẠN)" or ""
-        local pos = "Không rõ"
+        local pos = "?"
         if plr.Character then
             local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
-                pos = string.format("(%.0f, %.0f, %.0f)", hrp.Position.X, hrp.Position.Y, hrp.Position.Z)
+                pos = string.format("(%.0f,%.0f,%.0f)", hrp.Position.X, hrp.Position.Y, hrp.Position.Z)
             end
         end
-        local t = "  " .. i .. ". " .. plr.Name .. tag .. " | " .. pos
+        local t = "  " .. i .. ". " .. plr.Name .. tag .. " " .. pos
         addLine(t, tag ~= "" and Color3.fromRGB(100, 255, 120) or nil)
         addToText(t)
-        task.wait(0.03)
     end
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 4. WORKSPACE CHI TIẾT =====
-    section("4. WORKSPACE CHI TIẾT")
-    task.wait(0.1)
-    local partCount, modelCount, scriptCount, total, meshCount, unionCount = 0, 0, 0, 0, 0, 0
-    local spawns, npcs, vehicles = {}, {}, {}
-    
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        total = total + 1
-        if obj:IsA("BasePart") then partCount = partCount + 1 end
-        if obj:IsA("MeshPart") then meshCount = meshCount + 1 end
-        if obj:IsA("UnionOperation") then unionCount = unionCount + 1 end
-        if obj:IsA("Model") then
-            modelCount = modelCount + 1
-            -- Phân loại Model
-            local n = obj.Name:lower()
-            if n:find("npc") or n:find("dummy") or n:find("enemy") then 
-                table.insert(npcs, obj.Name) 
+    -- 4. WORKSPACE
+    section("4. WORKSPACE")
+    local partCount, modelCount, scriptCount, total, meshCount = 0, 0, 0, 0, 0
+    local npcs, vehicles = {}, {}
+    pcall(function()
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            total = total + 1
+            if obj:IsA("BasePart") then partCount = partCount + 1 end
+            if obj:IsA("MeshPart") then meshCount = meshCount + 1 end
+            if obj:IsA("Model") then
+                modelCount = modelCount + 1
+                local n = obj.Name:lower()
+                if n:find("npc") or n:find("dummy") or n:find("enemy") then
+                    table.insert(npcs, obj.Name)
+                end
+                if n:find("car") or n:find("vehicle") or n:find("truck") or n:find("xe") then
+                    table.insert(vehicles, obj.Name)
+                end
             end
-            if n:find("car") or n:find("vehicle") or n:find("xe") or n:find("truck") then 
-                table.insert(vehicles, obj.Name) 
+            if obj:IsA("Script") or obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
+                scriptCount = scriptCount + 1
             end
         end
-        if obj:IsA("SpawnLocation") then
-            table.insert(spawns, obj.Name)
-        end
-        if obj:IsA("Script") or obj:IsA("LocalScript") or obj:IsA("ModuleScript") then
-            scriptCount = scriptCount + 1
-        end
-    end
-    
+    end)
     line("Tổng object", total)
-    line("Số Part (BasePart)", partCount)
+    line("Số Part", partCount)
     line("Số MeshPart", meshCount)
-    line("Số Union", unionCount)
     line("Số Model", modelCount)
-    line("Số Script/Module", scriptCount)
-    line("Số SpawnLocation", #spawns)
+    line("Số Script", scriptCount)
     line("Số NPC (đoán)", #npcs)
     line("Số phương tiện (đoán)", #vehicles)
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 5. TOẠ ĐỘ VẬT THỂ ĐẶC BIỆT =====
+    -- 5. TOẠ ĐỘ VẬT THỂ
     section("5. TOẠ ĐỘ VẬT THỂ")
-    task.wait(0.1)
 
-    -- 5.1. Người chơi khác
     addLine("── Người chơi khác ──", Color3.fromRGB(200, 200, 100))
     addToText("── Người chơi khác ──")
-    for _, plr in ipairs(Players:GetPlayers()) do
+    for _, plr in ipairs(players) do
         if plr ~= Player and plr.Character then
             local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
@@ -297,112 +338,91 @@ local function collectGameInfo()
             end
         end
     end
-    task.wait(0.05)
+    task.wait(0.03)
 
-    -- 5.2. NPC (đoán theo tên)
     if #npcs > 0 then
         addLine("── NPC (đoán) ──", Color3.fromRGB(200, 200, 100))
         addToText("── NPC ──")
         local dem = 0
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("Model") and (obj.Name:lower():find("npc") or obj.Name:lower():find("enemy") or obj.Name:lower():find("dummy")) then
-                dem = dem + 1
-                if dem <= 15 then
-                    local pivot = obj:GetPivot().Position
-                    local t = "  " .. obj.Name .. ": X=" .. string.format("%.1f", pivot.X) .. " Y=" .. string.format("%.1f", pivot.Y) .. " Z=" .. string.format("%.1f", pivot.Z)
-                    addLine(t)
-                    addToText(t)
-                end
-            end
-        end
-        if dem > 15 then
-            addLine("  ... và " .. (dem - 15) .. " NPC nữa")
-            addToText("  ... và " .. (dem - 15) .. " NPC nữa")
-        end
-    end
-    task.wait(0.05)
-
-    -- 5.3. Phương tiện
-    if #vehicles > 0 then
-        addLine("── Phương tiện (đoán) ──", Color3.fromRGB(200, 200, 100))
-        addToText("── Phương tiện ──")
-        local dem = 0
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj:IsA("Model") and (obj.Name:lower():find("car") or obj.Name:lower():find("vehicle") or obj.Name:lower():find("truck") or obj.Name:lower():find("xe")) then
-                dem = dem + 1
-                if dem <= 10 then
-                    local pivot = obj:GetPivot().Position
-                    local t = "  " .. obj.Name .. ": X=" .. string.format("%.1f", pivot.X) .. " Y=" .. string.format("%.1f", pivot.Y) .. " Z=" .. string.format("%.1f", pivot.Z)
-                    addLine(t)
-                    addToText(t)
-                end
-            end
-        end
-    end
-    task.wait(0.05)
-
-    -- 5.4. Vật thể gần người chơi (trong bán kính 30 studs)
-    addLine("── Vật thể gần bạn (<30 studs) ──", Color3.fromRGB(200, 200, 100))
-    addToText("── Vật thể gần bạn (<30 studs) ──")
-    if Player.Character then
-        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            local count = 0
+        pcall(function()
             for _, obj in ipairs(Workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and obj.Parent ~= Player.Character then
-                    local dist = (obj.Position - hrp.Position).Magnitude
-                    if dist < 30 then
-                        count = count + 1
-                        if count <= 15 then
-                            local t = "  " .. obj.Name .. " | dist=" .. string.format("%.1f", dist)
+                if obj:IsA("Model") then
+                    local n = obj.Name:lower()
+                    if n:find("npc") or n:find("enemy") or n:find("dummy") then
+                        dem = dem + 1
+                        if dem <= 15 then
+                            local p = obj:GetPivot().Position
+                            local t = "  " .. obj.Name .. ": X=" .. string.format("%.1f", p.X) .. " Y=" .. string.format("%.1f", p.Y) .. " Z=" .. string.format("%.1f", p.Z)
                             addLine(t)
                             addToText(t)
                         end
                     end
                 end
             end
-            if count > 15 then
-                addLine("  ... và " .. (count - 15) .. " vật thể nữa gần bạn")
-                addToText("  ... và " .. (count - 15) .. " vật thể nữa")
-            end
+        end)
+        if dem > 15 then
+            addLine("  ... và " .. (dem - 15) .. " NPC nữa")
+            addToText("  ... và " .. (dem - 15) .. " nữa")
+        end
+    end
+    task.wait(0.03)
+
+    -- Vật thể gần bạn
+    if Player.Character then
+        local hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            addLine("── Vật thể gần bạn (<30 studs) ──", Color3.fromRGB(200, 200, 100))
+            addToText("── Vật thể gần bạn (<30 studs) ──")
+            local count = 0
+            pcall(function()
+                for _, obj in ipairs(Workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and obj.Parent ~= Player.Character then
+                        local dist = (obj.Position - hrp.Position).Magnitude
+                        if dist < 30 then
+                            count = count + 1
+                            if count <= 15 then
+                                local t = "  " .. obj.Name .. " | dist=" .. string.format("%.1f", dist)
+                                addLine(t)
+                                addToText(t)
+                            end
+                        end
+                    end
+                end
+            end)
             if count == 0 then
-                addLine("  (Không có vật thể nào trong 30 studs)")
+                addLine("  (Không có vật thể nào)")
                 addToText("  (Không có)")
             end
         end
     end
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 6. CAMERA =====
+    -- 6. CAMERA
     section("6. CAMERA")
-    task.wait(0.1)
-    local cam = Workspace.CurrentCamera
-    if cam then
-        local c = cam.CFrame.Position
-        line("Vị trí camera", string.format("X=%.1f, Y=%.1f, Z=%.1f", c.X, c.Y, c.Z))
-        line("Hướng nhìn X", string.format("%.2f", cam.CFrame.LookVector.X))
-        line("Hướng nhìn Y", string.format("%.2f", cam.CFrame.LookVector.Y))
-        line("Hướng nhìn Z", string.format("%.2f", cam.CFrame.LookVector.Z))
-        line("FOV", cam.FieldOfView)
-        line("Loại camera", tostring(cam.CameraType))
-    end
-    task.wait(0.1)
+    pcall(function()
+        local cam = Workspace.CurrentCamera
+        if cam then
+            local c = cam.CFrame.Position
+            line("Vị trí camera", string.format("X=%.1f, Y=%.1f, Z=%.1f", c.X, c.Y, c.Z))
+            line("FOV", cam.FieldOfView)
+            line("CameraType", tostring(cam.CameraType))
+        end
+    end)
+    task.wait(0.05)
 
-    -- ===== 7. REPLICATEDSTORAGE =====
+    -- 7. REPLICATEDSTORAGE
     section("7. REPLICATEDSTORAGE")
-    task.wait(0.1)
-    local remotes, funcs, folders, modules = {}, {}, {}, {}
-    for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
-        if obj:IsA("RemoteEvent") then table.insert(remotes, obj:GetFullName()) end
-        if obj:IsA("RemoteFunction") then table.insert(funcs, obj:GetFullName()) end
-        if obj:IsA("Folder") then table.insert(folders, obj.Name) end
-        if obj:IsA("ModuleScript") then table.insert(modules, obj.Name) end
-    end
+    local remotes, funcs, modules = {}, {}, {}
+    pcall(function()
+        for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+            if obj:IsA("RemoteEvent") then table.insert(remotes, obj:GetFullName()) end
+            if obj:IsA("RemoteFunction") then table.insert(funcs, obj:GetFullName()) end
+            if obj:IsA("ModuleScript") then table.insert(modules, obj.Name) end
+        end
+    end)
     line("Số RemoteEvent", #remotes)
     line("Số RemoteFunction", #funcs)
-    line("Số Folder", #folders)
     line("Số ModuleScript", #modules)
-    task.wait(0.1)
 
     if #remotes > 0 then
         addLine("── RemoteEvent (30 đầu) ──", Color3.fromRGB(200, 200, 100))
@@ -412,137 +432,128 @@ local function collectGameInfo()
                 local t = "  " .. i .. ". " .. name
                 addLine(t)
                 addToText(t)
-                task.wait(0.02)
             end
         end
         if #remotes > 30 then
-            addLine("  ... và " .. (#remotes - 30) .. " RemoteEvent nữa")
+            addLine("  ... và " .. (#remotes - 30) .. " nữa")
             addToText("  ... và " .. (#remotes - 30) .. " nữa")
         end
     end
+    task.wait(0.05)
 
-    if #modules > 0 then
-        addLine("── ModuleScript (15 đầu) ──", Color3.fromRGB(200, 200, 100))
-        addToText("── ModuleScript ──")
-        for i, name in ipairs(modules) do
-            if i <= 15 then
-                local t = "  " .. i .. ". " .. name
-                addLine(t)
-                addToText(t)
-                task.wait(0.02)
+    -- 8. TAGS
+    section("8. TAGS")
+    local tags = {}
+    pcall(function()
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            local ot = CollectionService:GetTags(obj)
+            for _, tag in ipairs(ot) do
+                tags[tag] = (tags[tag] or 0) + 1
             end
         end
-    end
-    task.wait(0.1)
-
-    -- ===== 8. TAGS (CollectionService) =====
-    section("8. TAGS ĐANG DÙNG")
-    task.wait(0.1)
-    local tags = CollectionService:GetAllTags()
-    line("Tổng số tag", #tags)
-    for i, tag in ipairs(tags) do
-        if i <= 30 then
-            local count = #CollectionService:GetTagged(tag)
-            local t = "  " .. i .. ". " .. tag .. " (" .. count .. " object)"
+    end)
+    local tagCount = 0
+    for tag, count in pairs(tags) do
+        tagCount = tagCount + 1
+        if tagCount <= 30 then
+            local t = "  " .. tagCount .. ". " .. tag .. " (" .. count .. ")"
             addLine(t)
             addToText(t)
-            task.wait(0.02)
         end
     end
-    if #tags > 30 then
-        addLine("  ... và " .. (#tags - 30) .. " tag nữa")
-        addToText("  ... và " .. (#tags - 30) .. " nữa")
+    if tagCount == 0 then
+        addLine("  (Không có tag nào)")
+        addToText("  (Không có)")
     end
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 9. LIGHTING =====
-    section("9. MÔI TRƯỜNG & ÁNH SÁNG")
-    task.wait(0.1)
-    line("Giờ trong game", string.format("%.2f", Lighting.ClockTime))
-    line("Độ sáng", Lighting.Brightness)
-    line("Màu sương mù", tostring(Lighting.FogColor))
-    line("Khoảng cách sương mù (start/end)", Lighting.FogStart .. " / " .. Lighting.FogEnd)
-    line("Ánh sáng môi trường", tostring(Lighting.Ambient))
-    line("Outdoor Ambient", tostring(Lighting.OutdoorAmbient))
-    line("Global Shadows", tostring(Lighting.GlobalShadows))
-    line("Technology", tostring(Lighting.Technology))
-    line("Số hiệu ứng", #Lighting:GetChildren())
-    task.wait(0.1)
+    -- 9. MÔI TRƯỜNG
+    section("9. MÔI TRƯỜNG")
+    pcall(function() line("Giờ trong game", string.format("%.2f", Lighting.ClockTime)) end)
+    pcall(function() line("Độ sáng", Lighting.Brightness) end)
+    pcall(function() line("Màu sương mù", tostring(Lighting.FogColor)) end)
+    pcall(function() line("FogEnd", Lighting.FogEnd) end)
+    pcall(function() line("Ambient", tostring(Lighting.Ambient)) end)
+    task.wait(0.05)
 
-    -- ===== 10. TOOL TRONG BACKPACK =====
-    section("10. TOOL TRONG BACKPACK")
-    task.wait(0.1)
-    local backpack = Player:FindFirstChild("Backpack")
-    if backpack then
-        local tools = backpack:GetChildren()
-        line("Số tool", #tools)
-        for i, tool in ipairs(tools) do
-            if tool:IsA("Tool") then
-                local t = "  " .. i .. ". " .. tool.Name
-                addLine(t)
-                addToText(t)
+    -- 10. TOOL
+    section("10. TOOL BACKPACK")
+    pcall(function()
+        local bp = Player:FindFirstChild("Backpack")
+        if bp then
+            local tools = bp:GetChildren()
+            line("Số tool", #tools)
+            for i, tool in ipairs(tools) do
+                if tool:IsA("Tool") then
+                    local t = "  " .. i .. ". " .. tool.Name
+                    addLine(t)
+                    addToText(t)
+                end
             end
         end
-    end
-    if Player.Character then
-        local held = Player.Character:FindFirstChildOfClass("Tool")
-        if held then
-            line("Đang cầm", held.Name)
+        if Player.Character then
+            local held = Player.Character:FindFirstChildOfClass("Tool")
+            if held then
+                line("Đang cầm", held.Name)
+            end
         end
-    end
-    task.wait(0.1)
+    end)
+    task.wait(0.05)
 
-    -- ===== 11. ÂM THANH ĐANG PHÁT =====
+    -- 11. ÂM THANH
     section("11. ÂM THANH ĐANG PHÁT")
-    task.wait(0.1)
     local sounds = {}
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("Sound") and obj.IsPlaying then
-            table.insert(sounds, obj.Name .. " (ID: " .. obj.SoundId .. ")")
+    pcall(function()
+        for _, obj in ipairs(Workspace:GetDescendants()) do
+            if obj:IsA("Sound") and obj.IsPlaying then
+                table.insert(sounds, obj.Name)
+            end
         end
-    end
-    line("Số âm thanh đang phát", #sounds)
+    end)
+    line("Số âm thanh", #sounds)
     for i, s in ipairs(sounds) do
         if i <= 10 then
             addLine("  " .. i .. ". " .. s)
             addToText("  " .. i .. ". " .. s)
         end
     end
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 12. PLAYER ATTRIBUTES =====
-    section("12. ATTRIBUTES CỦA GAME")
-    task.wait(0.1)
-    local attrs = game:GetAttributes()
-    local count = 0
-    for k, v in pairs(attrs) do
-        count = count + 1
-        local t = "  " .. k .. " = " .. tostring(v)
-        addLine(t)
-        addToText(t)
-    end
-    if count == 0 then
-        addLine("  (Không có attribute nào)")
+    -- 12. ATTRIBUTES
+    section("12. ATTRIBUTES GAME")
+    local attrCount = 0
+    pcall(function()
+        for k, v in pairs(game:GetAttributes()) do
+            attrCount = attrCount + 1
+            local t = "  " .. k .. " = " .. tostring(v)
+            addLine(t)
+            addToText(t)
+        end
+    end)
+    if attrCount == 0 then
+        addLine("  (Không có)")
         addToText("  (Không có)")
     end
-    task.wait(0.1)
+    task.wait(0.05)
 
-    -- ===== 13. STARTER GUI =====
-    section("13. STARTERPACK & STARTERGUI")
-    task.wait(0.1)
-    line("StarterPack items", #StarterPack:GetChildren())
-    line("StarterGui items", #StarterGui:GetChildren())
-    task.wait(0.1)
+    -- 13. STARTERPACK
+    section("13. STARTERPACK & GUI")
+    pcall(function() line("StarterPack items", #StarterPack:GetChildren()) end)
+    pcall(function() line("Số PlayerGui", #Player:FindFirstChild("PlayerGui"):GetChildren()) end)
+    task.wait(0.05)
 
-    -- ===== HOÀN THÀNH =====
+    -- Kết
     addLine("═════ ✅ HOÀN THÀNH ═════", Color3.fromRGB(50, 220, 80))
-    addToText("═══════════ HOÀN THÀNH ═══════════")
+    addToText("═══════════ ✅ HOÀN THÀNH ═══════════")
     addToText("Thời gian: " .. os.date("%Y-%m-%d %H:%M:%S"))
+    addToText("📱 GUI tại TikTok: matcuoi290")
 
-    statusLabel.Text = "Trạng thái: ✅ Đã lấy xong!"
+    statusLabel.Text = "Trạng thái: ✅ Xong! (" .. lineCount .. " mục)"
     statusLabel.TextColor3 = Color3.fromRGB(100, 255, 120)
     copyBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 0)
     saveBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 180)
+
+    print("✅ [GameInfo] Đã lấy xong " .. lineCount .. " mục!")
 end
 
 -- ==========================================
@@ -595,14 +606,16 @@ getBtn.MouseButton1Click:Connect(function()
 
     yesBtn.MouseButton1Click:Connect(function()
         confirmDialog:Destroy()
-        collectGameInfo()
+        task.spawn(collectGameInfo)
     end)
     noBtn.MouseButton1Click:Connect(function()
         confirmDialog:Destroy()
     end)
 end)
 
-confirmBtn.MouseButton1Click:Connect(function() collectGameInfo() end)
+confirmBtn.MouseButton1Click:Connect(function()
+    task.spawn(collectGameInfo)
+end)
 
 copyBtn.MouseButton1Click:Connect(function()
     if gameInfoText == "" then
@@ -643,7 +656,7 @@ saveBtn.MouseButton1Click:Connect(function()
         statusLabel.Text = "Trạng thái: 💾 Đã lưu file!"
         statusLabel.TextColor3 = Color3.fromRGB(180, 150, 255)
     else
-        statusLabel.Text = "Trạng thái: ⚠️ Executor không hỗ trợ lưu file!"
+        statusLabel.Text = "Trạng thái: ⚠️ Không lưu được file!"
         statusLabel.TextColor3 = Color3.fromRGB(255, 150, 100)
     end
 end)
@@ -681,4 +694,4 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
-print("✅ Script v2.0 đã chạy! GUI hiện ra ở giữa màn hình.")
+print("✅ [GameInfo v2.2] Sẵn sàng! GUI tại TikTok: matcuoi290")
