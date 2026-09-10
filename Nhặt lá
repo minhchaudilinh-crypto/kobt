@@ -1,0 +1,232 @@
+-- Clean All The Leaves Hub (Version 24.0 - Auto Farm = Loader)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+Player.CharacterAdded:Connect(function(c) Character = c end)
+
+-- ==================== GUI SETUP ====================
+local gui = Instance.new("ScreenGui")
+gui.Name = "LeavesHubv24"
+gui.ResetOnSpawn = false
+if gethui then gui.Parent = gethui() else gui.Parent = Player:WaitForChild("PlayerGui") end
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 520, 0, 280)
+main.Position = UDim2.new(0.5, -260, 0.5, -140)
+main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+main.BorderColor3 = Color3.fromRGB(255, 255, 255)
+main.BorderSizePixel = 2
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+
+local function createDecor(text, xPos, yPos, size)
+    local lbl = Instance.new("TextLabel")
+    lbl.Text = text
+    lbl.Size = UDim2.new(0, size, 0, size)
+    lbl.Position = UDim2.new(0, xPos, 0, yPos)
+    lbl.BackgroundTransparency = 1
+    lbl.TextScaled = true
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Parent = main
+end
+createDecor("🍂", -5, -5, 35)
+createDecor("🧹", 490, -5, 35)
+createDecor("🌿", -5, 250, 35)
+createDecor("🍁", 490, 250, 35)
+
+-- Nút Thu Nhỏ Kéo Thả
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 40, 0, 40)
+toggleBtn.Position = UDim2.new(0.9, -20, 0.1, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.BorderSizePixel = 2
+toggleBtn.Text = "🍂"
+toggleBtn.TextSize = 22
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Parent = gui
+toggleBtn.Visible = false
+toggleBtn.Active = true
+toggleBtn.Draggable = true
+
+local dragging, dragInput, dragStart, startPos = false, nil, nil, nil
+toggleBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = toggleBtn.Position
+        input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+    end
+end)
+toggleBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        toggleBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+toggleBtn.MouseButton1Click:Connect(function() main.Visible = true; toggleBtn.Visible = false end)
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -40, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+closeBtn.Parent = main
+closeBtn.MouseButton1Click:Connect(function() main.Visible = false; toggleBtn.Visible = true end)
+
+local title = Instance.new("TextLabel")
+title.Text = "🍂 Gui CH 1.0 Clean all the leaves 🧹"
+title.Size = UDim2.new(0, 400, 0, 30)
+title.Position = UDim2.new(0, 60, 0, 5)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Parent = main
+
+local function createButton(text, xPos, yPos, w, h, func)
+    local btn = Instance.new("TextButton")
+    btn.Text = text
+    btn.Size = UDim2.new(0, w, 0, h)
+    btn.Position = UDim2.new(0, xPos, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BorderSizePixel = 2
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Parent = main
+    btn.MouseButton1Click:Connect(func)
+end
+
+-- ==================== BIẾN ====================
+_G.SpeedMe = false
+_G.SpeedMap = false
+_G.Fly = false
+_G.FlyDir = {L=false, R=false, U=false, D=false, F=false}
+
+-- ==================== HÀM CHẠY LOADER ====================
+local function runLoader()
+    local url = "https://raw.githubusercontent.com/joustingmatch/Ouroboros/main/loader.lua"
+    local success, err = pcall(function()
+        local code = game:HttpGet(url)
+        loadstring(code)()
+    end)
+    if success then
+        print("[LeavesHub] Đã chạy loader thành công!")
+    else
+        warn("[LeavesHub] Lỗi khi chạy loader: " .. tostring(err))
+    end
+end
+
+-- ==================== FLY ====================
+RunService.RenderStepped:Connect(function()
+    if _G.Fly and Character then
+        local hrp = Character:FindFirstChild("HumanoidRootPart")
+        local humanoid = Character:FindFirstChild("Humanoid")
+        if hrp and humanoid then
+            humanoid.PlatformStand = true
+            local speed = 80
+            local moveDir = Vector3.new(0, 0, 0)
+            local camera = workspace.CurrentCamera
+
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir + Vector3.new(-1, 0, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + Vector3.new(1, 0, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + Vector3.new(0, 0, -1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir + Vector3.new(0, 0, 1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir + Vector3.new(0, -1, 0) end
+            if _G.FlyDir.L then moveDir = moveDir + Vector3.new(-1, 0, 0) end
+            if _G.FlyDir.R then moveDir = moveDir + Vector3.new(1, 0, 0) end
+            if _G.FlyDir.U then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if _G.FlyDir.D then moveDir = moveDir + Vector3.new(0, -1, 0) end
+            if _G.FlyDir.F then
+                local camLook = camera.CFrame.LookVector
+                moveDir = moveDir + Vector3.new(camLook.X, 0, camLook.Z)
+            end
+
+            if moveDir.Magnitude > 0 then hrp.Velocity = moveDir.Unit * speed
+            else hrp.Velocity = Vector3.new(0, 0, 0) end
+        end
+    end
+end)
+
+-- ==================== TỐC ĐỘ ====================
+local function setMySpeed(sp)
+    if Character then local h = Character:FindFirstChild("Humanoid"); if h then h.WalkSpeed = sp end end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if _G.SpeedMap then
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr ~= Player and plr.Character then
+                    local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+                    if hum and hum.WalkSpeed < 100 then hum.WalkSpeed = 100 end
+                end
+            end
+        end
+    end
+end)
+
+-- ==================== FLY PAD MOBILE ====================
+local flyPad = Instance.new("Frame")
+flyPad.Size = UDim2.new(0, 180, 0, 180)
+flyPad.Position = UDim2.new(0, 20, 0.5, -90)
+flyPad.BackgroundTransparency = 1
+flyPad.Parent = gui
+flyPad.Visible = false
+
+local function createFlyBtn(text, xPos, yPos, dirKey)
+    local btn = Instance.new("TextButton")
+    btn.Text = text
+    btn.Size = UDim2.new(0, 55, 0, 55)
+    btn.Position = UDim2.new(0, xPos, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BorderSizePixel = 2
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 22
+    btn.Parent = flyPad
+    btn.MouseButton1Down:Connect(function() _G.FlyDir[dirKey] = true end)
+    btn.MouseButton1Up:Connect(function() _G.FlyDir[dirKey] = false end)
+    btn.MouseLeave:Connect(function() _G.FlyDir[dirKey] = false end)
+end
+createFlyBtn("⬆", 62, 0, "U")
+createFlyBtn("⬅", 0, 62, "L")
+createFlyBtn("➡", 125, 62, "R")
+createFlyBtn("🚀", 0, 125, "F")
+createFlyBtn("⬇", 125, 125, "D")
+
+-- ==================== NÚT CHÍNH ====================
+-- ⭐ NÚT AUTO FARM → CHẠY LOADER
+createButton("🍂 Auto Farm", 20, 60, 150, 40, function()
+    runLoader()
+end)
+
+createButton("⚡ Speed + (Mình)", 20, 110, 150, 40, function() _G.SpeedMe = true; setMySpeed(100) end)
+createButton("🐢 Speed - (Mình)", 20, 160, 150, 40, function() _G.SpeedMe = false; setMySpeed(16) end)
+createButton("⚡ Speed + (Map)", 20, 210, 150, 40, function() _G.SpeedMap = true end)
+createButton("🐢 Speed - (Map)", 190, 210, 150, 40, function()
+    _G.SpeedMap = false
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.WalkSpeed = 16 end
+        end
+    end
+end)
+createButton("🕊 Bật/Tắt Fly", 190, 60, 150, 40, function()
+    _G.Fly = not _G.Fly
+    flyPad.Visible = _G.Fly
+    if not _G.Fly and Character then
+        local hum = Character:FindFirstChild("Humanoid")
+        if hum then hum.PlatformStand = false; hum:ChangeState(Enum.HumanoidStateType.GettingUp) end
+    end
+end)
+createButton("💡 PC: WASD + Space/Shift", 190, 110, 300, 40, function() end)
