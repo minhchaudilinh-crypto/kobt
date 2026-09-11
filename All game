@@ -557,4 +557,108 @@ local function createESP(targetPlayer)
         local myPos = player.Character.HumanoidRootPart.Position
         local theirPos = targetPlayer.Character.HumanoidRootPart.Position
         local dist = math.floor((myPos - theirPos).Magnitude)
-        distLabel.Text = dis
+        distLabel.Text = dist .. " studs"
+    end)
+    table.insert(espObjects[targetPlayer], {Destroy = function() distConn:Disconnect() end})
+end
+
+-- Hàm xoá ESP
+local function removeESP(targetPlayer)
+    if espObjects[targetPlayer] then
+        for _, obj in pairs(espObjects[targetPlayer]) do
+            if typeof(obj) == "table" and obj.Destroy then
+                obj.Destroy()
+            elseif obj and obj.Parent then
+                obj:Destroy()
+            end
+        end
+        espObjects[targetPlayer] = nil
+    end
+end
+
+-- Hàm bật/tắt ESP
+local function updateESP()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            if espActive then
+                createESP(p)
+            else
+                removeESP(p)
+            end
+        end
+    end
+end
+
+-- Bật/tắt ESP
+espBtn.MouseButton1Click:Connect(function()
+    espActive = not espActive
+    if espActive then
+        espBtn.Text = "👁️ ESP: BẬT"
+        espBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        updateESP()
+    else
+        espBtn.Text = "👁️ ESP: TẮT"
+        espBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+        updateESP()
+    end
+end)
+
+-- Bật/tắt khoảng cách
+distBtn.MouseButton1Click:Connect(function()
+    showDistance = not showDistance
+    distBtn.Text = showDistance and "📏 KHOẢNG CÁCH: BẬT" or "📏 KHOẢNG CÁCH: TẮT"
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            local bb = p.Character:FindFirstChild("ESP_Billboard", true)
+            if bb then
+                local d = bb:FindFirstChild("ESP_Distance")
+                if d then d.Visible = showDistance end
+            end
+        end
+    end
+end)
+
+-- Bật/tắt tên
+nameBtn.MouseButton1Click:Connect(function()
+    showName = not showName
+    nameBtn.Text = showName and "📛 TÊN: BẬT" or "📛 TÊN: TẮT"
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            local bb = p.Character:FindFirstChild("ESP_Billboard", true)
+            if bb then
+                local n = bb:FindFirstChild("ESP_Name")
+                if n then n.Visible = showName end
+            end
+        end
+    end
+end)
+
+-- Bật/tắt khung
+boxBtn.MouseButton1Click:Connect(function()
+    showBox = not showBox
+    boxBtn.Text = showBox and "⬜ KHUNG: BẬT" or "⬜ KHUNG: TẮT"
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player and p.Character then
+            local h = p.Character:FindFirstChild("ESP_Highlight", true)
+            if h then h.Enabled = showBox end
+        end
+    end
+end)
+
+-- Bật/tắt đường chỉ (bỏ qua vì đơn giản)
+lineBtn.MouseButton1Click:Connect(function()
+    showLine = not showLine
+    lineBtn.Text = showLine and "📏 ĐƯỜNG CHỈ: BẬT" or "📏 ĐƯỜNG CHỈ: TẮT"
+end)
+
+-- Tự động cập nhật ESP khi có người vào/ra
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function()
+        task.wait(1)
+        if espActive then createESP(p) end
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+    removeESP(p)
+end)
