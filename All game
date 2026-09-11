@@ -5,42 +5,41 @@ local fbB = mkBtn(pgTool,"ÁNH SÁNG: TẮT",71,GR)
 local bhB = mkBtn(pgTool,"NHẢY LIÊN TỤC: TẮT",104,GR)
 local ijB = mkBtn(pgTool,"NHẢY VÔ HẠN: TẮT",137,GR)
 
--- Chọn mục tiêu
-local targetLabel = Instance.new("TextLabel",pgTool)
-targetLabel.Size = UDim2.new(0.92,0,0,18)
-targetLabel.Position = UDim2.new(0.04,0,0,172)
-targetLabel.BackgroundTransparency = 1
-targetLabel.Text = "◆ CHỌN MỤC TIÊU ĐỂ TROLL"
-targetLabel.TextColor3 = YE
-targetLabel.Font = Enum.Font.GothamBold
-targetLabel.TextSize = 11
-targetLabel.TextXAlignment = Enum.TextXAlignment.Left
+-- Tiêu đề chọn mục tiêu
+local tL = Instance.new("TextLabel",pgTool)
+tL.Size = UDim2.new(0.92,0,0,18)
+tL.Position = UDim2.new(0.04,0,0,172)
+tL.BackgroundTransparency = 1
+tL.Text = "◆ CHỌN MỤC TIÊU ĐỂ TROLL"
+tL.TextColor3 = YE
+tL.Font = Enum.Font.GothamBold
+tL.TextSize = 11
+tL.TextXAlignment = Enum.TextXAlignment.Left
 
--- Dropdown chọn người chơi
-local targetBtn = mkBtn(pgTool,"MỤC TIÊU: CHƯA CHỌN",190,OR,26)
+-- Nút chọn + danh sách
+local tB2 = mkBtn(pgTool,"MỤC TIÊU: CHƯA CHỌN",190,OR,26)
 
--- Danh sách chọn (ẩn mặc định)
-local targetList = Instance.new("ScrollingFrame",pgTool)
-targetList.Size = UDim2.new(0.92,0,0,120)
-targetList.Position = UDim2.new(0.04,0,0,218)
-targetList.BackgroundColor3 = IN
-targetList.BorderSizePixel = 0
-targetList.ScrollBarThickness = 5
-targetList.CanvasSize = UDim2.new(0,0,0,0)
-targetList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-targetList.Visible = false
-corner(targetList,8); stroke(targetList,BD,1,0.5)
-Instance.new("UIListLayout",targetList).Padding = UDim.new(0,3)
+local tList = Instance.new("ScrollingFrame",pgTool)
+tList.Size = UDim2.new(0.92,0,0,120)
+tList.Position = UDim2.new(0.04,0,0,218)
+tList.BackgroundColor3 = IN
+tList.BorderSizePixel = 0
+tList.ScrollBarThickness = 5
+tList.CanvasSize = UDim2.new(0,0,0,0)
+tList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+tList.Visible = false
+corner(tList,8); stroke(tList,BD,1,0.5)
+Instance.new("UIListLayout",tList).Padding = UDim.new(0,3)
 
-local selectedPlayer = nil
+local selP = nil
 
-local function updateTargetList()
-    for _,c in pairs(targetList:GetChildren()) do
+local function updateTList()
+    for _,c in pairs(tList:GetChildren()) do
         if c:IsA("TextButton") then c:Destroy() end
     end
     for _,p in pairs(P:GetPlayers()) do
         if p ~= L then
-            local b = Instance.new("TextButton",targetList)
+            local b = Instance.new("TextButton",tList)
             b.Size = UDim2.new(1,-8,0,24)
             b.BackgroundColor3 = PN
             b.Text = p.Name
@@ -51,60 +50,45 @@ local function updateTargetList()
             b.BorderSizePixel = 0
             corner(b,5)
             b.MouseButton1Click:Connect(function()
-                selectedPlayer = p
-                targetBtn.Text = "MỤC TIÊU: " .. p.Name
-                targetList.Visible = false
+                selP = p
+                tB2.Text = "MỤC TIÊU: " .. p.Name
+                tList.Visible = false
             end)
         end
     end
 end
 
-targetBtn.MouseButton1Click:Connect(function()
-    updateTargetList()
-    targetList.Visible = not targetList.Visible
+tB2.MouseButton1Click:Connect(function()
+    updateTList()
+    tList.Visible = not tList.Visible
 end)
 
--- Các nút TROLL
-local trollSound = mkBtn(pgTool,"🔊 ÂM THANH",348,BL,24)
-trollSound.Size = UDim2.new(0.44,0,0,24)
-trollSound.Position = UDim2.new(0.04,0,0,348)
+-- Nút troll
+local tSnd = mkBtn(pgTool,"🔊 ÂM THANH",348,BL,24)
+tSnd.Size = UDim2.new(0.44,0,0,24); tSnd.Position = UDim2.new(0.04,0,0,348)
+local tShk = mkBtn(pgTool,"💥 RUNG LẮC",348,RD,24)
+tShk.Size = UDim2.new(0.44,0,0,24); tShk.Position = UDim2.new(0.52,0,0,348)
+local tFir = mkBtn(pgTool,"🔥 ĐỐT CHÁY",378,OR,24)
+tFir.Size = UDim2.new(0.44,0,0,24); tFir.Position = UDim2.new(0.04,0,0,378)
+local tFrz = mkBtn(pgTool,"❄️ ĐÓNG BĂNG",378,CY,24)
+tFrz.Size = UDim2.new(0.44,0,0,24); tFrz.Position = UDim2.new(0.52,0,0,378)
+local tLch = mkBtn(pgTool,"🚀 BẮN BAY",408,PU,24)
+tLch.Size = UDim2.new(0.44,0,0,24); tLch.Position = UDim2.new(0.04,0,0,408)
+local tSpn = mkBtn(pgTool,"🌀 XOAY VÒNG",408,YE,24)
+tSpn.Size = UDim2.new(0.44,0,0,24); tSpn.Position = UDim2.new(0.52,0,0,408)
+local tGst = mkBtn(pgTool,"👻 BÓNG MA",438,BL,24)
+tGst.Size = UDim2.new(0.44,0,0,24); tGst.Position = UDim2.new(0.04,0,0,438)
+local tBom = mkBtn(pgTool,"💣 BÙM",438,RD,24)
+tBom.Size = UDim2.new(0.44,0,0,24); tBom.Position = UDim2.new(0.52,0,0,438)
 
-local trollShake = mkBtn(pgTool,"💥 RUNG LẮC",348,RD,24)
-trollShake.Size = UDim2.new(0.44,0,0,24)
-trollShake.Position = UDim2.new(0.52,0,0,348)
-
-local trollFire = mkBtn(pgTool,"🔥 ĐỐT CHÁY",378,OR,24)
-trollFire.Size = UDim2.new(0.44,0,0,24)
-trollFire.Position = UDim2.new(0.04,0,0,378)
-
-local trollFreeze = mkBtn(pgTool,"❄️ ĐÓNG BĂNG",378,CY,24)
-trollFreeze.Size = UDim2.new(0.44,0,0,24)
-trollFreeze.Position = UDim2.new(0.52,0,0,378)
-
-local trollLaunch = mkBtn(pgTool,"🚀 BẮN BAY",408,PU,24)
-trollLaunch.Size = UDim2.new(0.44,0,0,24)
-trollLaunch.Position = UDim2.new(0.04,0,0,408)
-
-local trollSpin = mkBtn(pgTool,"🌀 XOAY VÒNG",408,YE,24)
-trollSpin.Size = UDim2.new(0.44,0,0,24)
-trollSpin.Position = UDim2.new(0.52,0,0,408)
-
-local trollGhost = mkBtn(pgTool,"👻 BÓNG MA",438,BL,24)
-trollGhost.Size = UDim2.new(0.44,0,0,24)
-trollGhost.Position = UDim2.new(0.04,0,0,438)
-
-local trollBoom = mkBtn(pgTool,"💣 BÙM",438,RD,24)
-trollBoom.Size = UDim2.new(0.44,0,0,24)
-trollBoom.Position = UDim2.new(0.52,0,0,438)
-
--- ========== NOCLIP ==========
-local ncOn, ncConn = false, nil
+-- ===== NOCLIP =====
+local ncOn, ncC = false, nil
 ncB.MouseButton1Click:Connect(function()
     ncOn = not ncOn
     ncB.Text = ncOn and "XUYÊN TƯỜNG: BẬT" or "XUYÊN TƯỜNG: TẮT"
     ncB.BackgroundColor3 = ncOn and RD or GR
     if ncOn then
-        ncConn = R.Stepped:Connect(function()
+        ncC = R.Stepped:Connect(function()
             local c = L.Character
             if c then
                 for _,pt in pairs(c:GetDescendants()) do
@@ -112,14 +96,14 @@ ncB.MouseButton1Click:Connect(function()
                 end
             end
         end)
-    else
-        if ncConn then ncConn:Disconnect(); ncConn = nil end
+    elseif ncC then
+        ncC:Disconnect(); ncC = nil
     end
 end)
 
--- ========== TÀNG HÌNH ==========
+-- ===== TÀNG HÌNH =====
 local ivOn = false
-local function setInvis(v)
+local function setIv(v)
     local c = L.Character
     if not c then return end
     for _,pt in pairs(c:GetDescendants()) do
@@ -130,11 +114,11 @@ ivB.MouseButton1Click:Connect(function()
     ivOn = not ivOn
     ivB.Text = ivOn and "TÀNG HÌNH: BẬT" or "TÀNG HÌNH: TẮT"
     ivB.BackgroundColor3 = ivOn and RD or GR
-    setInvis(ivOn)
+    setIv(ivOn)
 end)
-L.CharacterAdded:Connect(function() if ivOn then wait(0.5); setInvis(true) end end)
+L.CharacterAdded:Connect(function() if ivOn then wait(0.5); setIv(true) end end)
 
--- ========== FULLBRIGHT ==========
+-- ===== FULLBRIGHT =====
 local fbOn = false
 fbB.MouseButton1Click:Connect(function()
     fbOn = not fbOn
@@ -153,25 +137,25 @@ fbB.MouseButton1Click:Connect(function()
     end
 end)
 
--- ========== BUNNY HOP ==========
-local bhOn, bhConn = false, nil
+-- ===== BUNNY HOP =====
+local bhOn, bhC = false, nil
 bhB.MouseButton1Click:Connect(function()
     bhOn = not bhOn
     bhB.Text = bhOn and "NHẢY LIÊN TỤC: BẬT" or "NHẢY LIÊN TỤC: TẮT"
     bhB.BackgroundColor3 = bhOn and RD or GR
     if bhOn then
-        bhConn = R.Heartbeat:Connect(function()
+        bhC = R.Heartbeat:Connect(function()
             local c = L.Character
             if not c then return end
             local h = c:FindFirstChildOfClass("Humanoid")
             if h and h.MoveDirection.Magnitude > 0 then h.Jump = true end
         end)
-    else
-        if bhConn then bhConn:Disconnect(); bhConn = nil end
+    elseif bhC then
+        bhC:Disconnect(); bhC = nil
     end
 end)
 
--- ========== NHẢY VÔ HẠN ==========
+-- ===== NHẢY VÔ HẠN =====
 local ijOn = false
 ijB.MouseButton1Click:Connect(function()
     ijOn = not ijOn
@@ -188,55 +172,48 @@ U.JumpRequest:Connect(function()
     end
 end)
 
--- ========== TROLL: ÂM THANH ==========
-local soundList = {"rbxassetid://9047612847","rbxassetid://6895079853","rbxassetid://6609636360","rbxassetid://1836170244","rbxassetid://3751156367"}
-trollSound.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local hd = selectedPlayer.Character:FindFirstChild("Head")
+-- ===== TROLL: ÂM THANH =====
+local sndList = {"rbxassetid://9047612847","rbxassetid://6895079853","rbxassetid://6609636360","rbxassetid://1836170244","rbxassetid://3751156367"}
+tSnd.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    local hd = selP.Character:FindFirstChild("Head")
     if not hd then return end
     local s = Instance.new("Sound",hd)
-    s.SoundId = soundList[math.random(1,#soundList)]
+    s.SoundId = sndList[math.random(1,#sndList)]
     s.Volume = 5
-    s.PlayOnRemove = false
     s:Play()
     game:GetService("Debris"):AddItem(s,5)
-    trollSound.BackgroundColor3 = YE
+    tSnd.BackgroundColor3 = YE
     wait(0.2)
-    trollSound.BackgroundColor3 = BL
+    tSnd.BackgroundColor3 = BL
 end)
 
--- ========== TROLL: RUNG LẮC ==========
-trollShake.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+-- ===== TROLL: RUNG LẮC =====
+tShk.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    local hrp = selP.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    local startPos = hrp.CFrame
-    local conn
-    local count = 0
-    conn = R.Heartbeat:Connect(function()
-        count = count + 1
-        if count > 60 then conn:Disconnect(); return end
-        local hd = selectedPlayer.Character
-        if not hd then conn:Disconnect(); return end
-        local h = hd:FindFirstChild("HumanoidRootPart")
-        if not h then conn:Disconnect(); return end
-        h.CFrame = startPos * CFrame.new(
-            math.random(-3,3)/10,
-            math.random(-3,3)/10,
-            math.random(-3,3)/10
-        )
+    local pos = hrp.CFrame
+    local n = 0
+    local c
+    c = R.Heartbeat:Connect(function()
+        n = n + 1
+        if n > 60 then c:Disconnect(); return end
+        local ch = selP.Character
+        if not ch then c:Disconnect(); return end
+        local h = ch:FindFirstChild("HumanoidRootPart")
+        if not h then c:Disconnect(); return end
+        h.CFrame = pos * CFrame.new(math.random(-3,3)/10, math.random(-3,3)/10, math.random(-3,3)/10)
     end)
-    game:GetService("Debris"):AddItem(Instance.new("Folder"),0)
-    trollShake.BackgroundColor3 = YE
+    tShk.BackgroundColor3 = YE
     wait(1)
-    trollShake.BackgroundColor3 = RD
+    tShk.BackgroundColor3 = RD
 end)
 
--- ========== TROLL: ĐỐT CHÁY ==========
-trollFire.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local char = selectedPlayer.Character
-    for _,pt in pairs(char:GetDescendants()) do
+-- ===== TROLL: ĐỐT CHÁY =====
+tFir.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    for _,pt in pairs(selP.Character:GetDescendants()) do
         if pt:IsA("BasePart") and pt.Name ~= "HumanoidRootPart" then
             local f = Instance.new("Fire",pt)
             f.Size = 5
@@ -244,91 +221,83 @@ trollFire.MouseButton1Click:Connect(function()
             game:GetService("Debris"):AddItem(f,5)
         end
     end
-    trollFire.BackgroundColor3 = YE
+    tFir.BackgroundColor3 = YE
     wait(0.2)
-    trollFire.BackgroundColor3 = OR
+    tFir.BackgroundColor3 = OR
 end)
 
--- ========== TROLL: ĐÓNG BĂNG ==========
-local frozenPlayers = {}
-trollFreeze.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+-- ===== TROLL: ĐÓNG BĂNG =====
+local frozen = {}
+tFrz.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    local hrp = selP.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-    if frozenPlayers[selectedPlayer] then
-        frozenPlayers[selectedPlayer]:Destroy()
-        frozenPlayers[selectedPlayer] = nil
+    if frozen[selP] then
+        frozen[selP]:Destroy()
+        frozen[selP] = nil
     else
         local bv = Instance.new("BodyVelocity")
         bv.MaxForce = Vector3.new(9e9,9e9,9e9)
         bv.Velocity = Vector3.new(0,0,0)
         bv.Parent = hrp
-        frozenPlayers[selectedPlayer] = bv
-        selectedPlayer.CharacterAdded:Connect(function()
-            if frozenPlayers[selectedPlayer] then frozenPlayers[selectedPlayer]:Destroy(); frozenPlayers[selectedPlayer] = nil end
-        end)
+        frozen[selP] = bv
     end
-    trollFreeze.BackgroundColor3 = YE
+    tFrz.BackgroundColor3 = YE
     wait(0.2)
-    trollFreeze.BackgroundColor3 = CY
+    tFrz.BackgroundColor3 = CY
 end)
 
--- ========== TROLL: BẮN BAY ==========
-trollLaunch.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+-- ===== TROLL: BẮN BAY =====
+tLch.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    local hrp = selP.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     local bv = Instance.new("BodyVelocity")
     bv.MaxForce = Vector3.new(9e9,9e9,9e9)
     bv.Velocity = Vector3.new(math.random(-50,50),300,math.random(-50,50))
     bv.Parent = hrp
     game:GetService("Debris"):AddItem(bv,3)
-    trollLaunch.BackgroundColor3 = YE
+    tLch.BackgroundColor3 = YE
     wait(0.2)
-    trollLaunch.BackgroundColor3 = PU
+    tLch.BackgroundColor3 = PU
 end)
 
--- ========== TROLL: XOAY VÒNG ==========
-trollSpin.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+-- ===== TROLL: XOAY VÒNG =====
+tSpn.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    local hrp = selP.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     local av = Instance.new("AngularVelocity")
     av.MaxTorque = Vector3.new(9e9,9e9,9e9)
     av.AngularVelocity = Vector3.new(0,50,0)
     av.Parent = hrp
     game:GetService("Debris"):AddItem(av,3)
-    trollSpin.BackgroundColor3 = YE
+    tSpn.BackgroundColor3 = YE
     wait(0.2)
-    trollSpin.BackgroundColor3 = YE
+    tSpn.BackgroundColor3 = YE
 end)
 
--- ========== TROLL: BÓNG MA ==========
-trollGhost.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local char = selectedPlayer.Character
-    for _,pt in pairs(char:GetDescendants()) do
-        if pt:IsA("BasePart") or pt:IsA("Decal") then
-            pt.Transparency = 0.7
-        end
+-- ===== TROLL: BÓNG MA =====
+tGst.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    for _,pt in pairs(selP.Character:GetDescendants()) do
+        if pt:IsA("BasePart") or pt:IsA("Decal") then pt.Transparency = 0.7 end
     end
     wait(3)
-    if selectedPlayer.Character then
-        for _,pt in pairs(selectedPlayer.Character:GetDescendants()) do
-            if pt:IsA("BasePart") or pt:IsA("Decal") then
-                pt.Transparency = 0
-            end
+    if selP.Character then
+        for _,pt in pairs(selP.Character:GetDescendants()) do
+            if pt:IsA("BasePart") or pt:IsA("Decal") then pt.Transparency = 0 end
         end
     end
-    trollGhost.BackgroundColor3 = YE
+    tGst.BackgroundColor3 = YE
     wait(0.2)
-    trollGhost.BackgroundColor3 = BL
+    tGst.BackgroundColor3 = BL
 end)
 
--- ========== TROLL: BÙM ==========
-trollBoom.MouseButton1Click:Connect(function()
-    if not selectedPlayer or not selectedPlayer.Character then return end
-    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+-- ===== TROLL: BÙM =====
+tBom.MouseButton1Click:Connect(function()
+    if not selP or not selP.Character then return end
+    local hrp = selP.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     local ex = Instance.new("Explosion")
     ex.Position = hrp.Position
@@ -336,7 +305,7 @@ trollBoom.MouseButton1Click:Connect(function()
     ex.BlastPressure = 500000
     ex.DestroyJointRadiusPercent = 0
     ex.Parent = workspace
-    trollBoom.BackgroundColor3 = YE
+    tBom.BackgroundColor3 = YE
     wait(0.2)
-    trollBoom.BackgroundColor3 = RD
+    tBom.BackgroundColor3 = RD
 end)
