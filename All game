@@ -1,0 +1,560 @@
+-- ===== 1. LẤY DỊCH VỤ =====
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- ===== 2. TẠO GUI CHÍNH =====
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MyToolGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- =====================================================
+-- ===== PHẦN A: BẢNG MẬT KHẨU =====
+-- =====================================================
+local MAT_KHAU_DUNG = "menu lam boi matcuoi290"
+
+local passFrame = Instance.new("Frame")
+passFrame.Size = UDim2.new(0, 260, 0, 180)
+passFrame.Position = UDim2.new(0.5, -130, 0.5, -90)
+passFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+passFrame.BorderSizePixel = 0
+passFrame.Active = true
+passFrame.Draggable = true
+passFrame.Parent = screenGui
+
+local passCorner = Instance.new("UICorner")
+passCorner.CornerRadius = UDim.new(0, 10)
+passCorner.Parent = passFrame
+
+local passTitle = Instance.new("TextLabel")
+passTitle.Size = UDim2.new(1, 0, 0, 40)
+passTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+passTitle.Text = "🔒 NHẬP MẬT KHẨU"
+passTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+passTitle.Font = Enum.Font.GothamBold
+passTitle.TextSize = 16
+passTitle.Parent = passFrame
+
+local passTitleCorner = Instance.new("UICorner")
+passTitleCorner.CornerRadius = UDim.new(0, 10)
+passTitleCorner.Parent = passTitle
+
+local passBox = Instance.new("TextBox")
+passBox.Size = UDim2.new(0.85, 0, 0, 35)
+passBox.Position = UDim2.new(0.075, 0, 0, 55)
+passBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+passBox.Text = ""
+passBox.PlaceholderText = "Nhập mật khẩu..."
+passBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+passBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+passBox.Font = Enum.Font.Gotham
+passBox.TextSize = 13
+passBox.Parent = passFrame
+
+local passBoxCorner = Instance.new("UICorner")
+passBoxCorner.CornerRadius = UDim.new(0, 6)
+passBoxCorner.Parent = passBox
+
+local thongBao = Instance.new("TextLabel")
+thongBao.Size = UDim2.new(1, 0, 0, 25)
+thongBao.Position = UDim2.new(0, 0, 0, 95)
+thongBao.BackgroundTransparency = 1
+thongBao.Text = ""
+thongBao.TextColor3 = Color3.fromRGB(255, 60, 60)
+thongBao.Font = Enum.Font.GothamBold
+thongBao.TextSize = 13
+thongBao.Parent = passFrame
+
+local confirmBtn = Instance.new("TextButton")
+confirmBtn.Size = UDim2.new(0.85, 0, 0, 35)
+confirmBtn.Position = UDim2.new(0.075, 0, 0, 125)
+confirmBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+confirmBtn.Text = "✅ XÁC NHẬN"
+confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmBtn.Font = Enum.Font.GothamBold
+confirmBtn.TextSize = 14
+confirmBtn.Parent = passFrame
+
+local confirmCorner = Instance.new("UICorner")
+confirmCorner.CornerRadius = UDim.new(0, 6)
+confirmCorner.Parent = confirmBtn
+
+-- =====================================================
+-- ===== PHẦN B: MENU CHÍNH (ẩn lúc đầu) =====
+-- =====================================================
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 320, 0, 380)
+frame.Position = UDim2.new(0.5, -160, 0.5, -190)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Visible = false
+frame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+title.Text = "⚡ TOOL CỦA TÔI ⚡"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.Parent = frame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = title
+
+-- ===== 4 TAB: MAIN, TP, ESP, GAMEPASS =====
+local tabMainBtn = Instance.new("TextButton")
+tabMainBtn.Size = UDim2.new(0.22, 0, 0, 28)
+tabMainBtn.Position = UDim2.new(0.02, 0, 0, 35)
+tabMainBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+tabMainBtn.Text = "🏠 MAIN"
+tabMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabMainBtn.Font = Enum.Font.GothamBold
+tabMainBtn.TextSize = 10
+tabMainBtn.Parent = frame
+
+local tabMainCorner = Instance.new("UICorner")
+tabMainCorner.CornerRadius = UDim.new(0, 6)
+tabMainCorner.Parent = tabMainBtn
+
+local tabTPBtn = Instance.new("TextButton")
+tabTPBtn.Size = UDim2.new(0.22, 0, 0, 28)
+tabTPBtn.Position = UDim2.new(0.26, 0, 0, 35)
+tabTPBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+tabTPBtn.Text = "📡 TP"
+tabTPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabTPBtn.Font = Enum.Font.GothamBold
+tabTPBtn.TextSize = 10
+tabTPBtn.Parent = frame
+
+local tabTPCorner = Instance.new("UICorner")
+tabTPCorner.CornerRadius = UDim.new(0, 6)
+tabTPCorner.Parent = tabTPBtn
+
+local tabESPBtn = Instance.new("TextButton")
+tabESPBtn.Size = UDim2.new(0.22, 0, 0, 28)
+tabESPBtn.Position = UDim2.new(0.50, 0, 0, 35)
+tabESPBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+tabESPBtn.Text = "👁️ ESP"
+tabESPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabESPBtn.Font = Enum.Font.GothamBold
+tabESPBtn.TextSize = 10
+tabESPBtn.Parent = frame
+
+local tabESPCorner = Instance.new("UICorner")
+tabESPCorner.CornerRadius = UDim.new(0, 6)
+tabESPCorner.Parent = tabESPBtn
+
+local tabGPBtn = Instance.new("TextButton")
+tabGPBtn.Size = UDim2.new(0.22, 0, 0, 28)
+tabGPBtn.Position = UDim2.new(0.74, 0, 0, 35)
+tabGPBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+tabGPBtn.Text = "🎁 GP"
+tabGPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabGPBtn.Font = Enum.Font.GothamBold
+tabGPBtn.TextSize = 10
+tabGPBtn.Parent = frame
+
+local tabGPCorner = Instance.new("UICorner")
+tabGPCorner.CornerRadius = UDim.new(0, 6)
+tabGPCorner.Parent = tabGPBtn
+
+-- ===== TAB MAIN =====
+local mainTab = Instance.new("Frame")
+mainTab.Size = UDim2.new(1, 0, 1, -70)
+mainTab.Position = UDim2.new(0, 0, 0, 68)
+mainTab.BackgroundTransparency = 1
+mainTab.Visible = true
+mainTab.Parent = frame
+
+local speedBtn = Instance.new("TextButton")
+speedBtn.Size = UDim2.new(0.9, 0, 0, 32)
+speedBtn.Position = UDim2.new(0.05, 0, 0, 5)
+speedBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+speedBtn.Text = "⚡ SPEED: TẮT"
+speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBtn.Font = Enum.Font.GothamBold
+speedBtn.TextSize = 13
+speedBtn.Parent = mainTab
+
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 6)
+speedCorner.Parent = speedBtn
+
+local speedBox = Instance.new("TextBox")
+speedBox.Size = UDim2.new(0.9, 0, 0, 26)
+speedBox.Position = UDim2.new(0.05, 0, 0, 40)
+speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+speedBox.Text = "100"
+speedBox.PlaceholderText = "Tốc độ chạy..."
+speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBox.Font = Enum.Font.Gotham
+speedBox.TextSize = 12
+speedBox.Parent = mainTab
+
+local speedBoxCorner = Instance.new("UICorner")
+speedBoxCorner.CornerRadius = UDim.new(0, 6)
+speedBoxCorner.Parent = speedBox
+
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(0.9, 0, 0, 32)
+flyBtn.Position = UDim2.new(0.05, 0, 0, 72)
+flyBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
+flyBtn.Text = "🕊️ BAY: TẮT"
+flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyBtn.Font = Enum.Font.GothamBold
+flyBtn.TextSize = 13
+flyBtn.Parent = mainTab
+
+local flyCorner = Instance.new("UICorner")
+flyCorner.CornerRadius = UDim.new(0, 6)
+flyCorner.Parent = flyBtn
+
+local flySpeedBox = Instance.new("TextBox")
+flySpeedBox.Size = UDim2.new(0.9, 0, 0, 26)
+flySpeedBox.Position = UDim2.new(0.05, 0, 0, 107)
+flySpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+flySpeedBox.Text = "50"
+flySpeedBox.PlaceholderText = "Tốc độ bay..."
+flySpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+flySpeedBox.Font = Enum.Font.Gotham
+flySpeedBox.TextSize = 12
+flySpeedBox.Parent = mainTab
+
+local flySpeedCorner = Instance.new("UICorner")
+flySpeedCorner.CornerRadius = UDim.new(0, 6)
+flySpeedCorner.Parent = flySpeedBox
+
+local guide = Instance.new("TextLabel")
+guide.Size = UDim2.new(0.9, 0, 0, 100)
+guide.Position = UDim2.new(0.05, 0, 0, 140)
+guide.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+guide.Text = "🎮 HƯỚNG DẪN BAY:\n• Mobile: Bấm 6 nút ở góc phải\n• PC: Dùng W/A/S/D\n• Space = Lên | Shift = Xuống\n• Bật FLY → 6 nút hiện ra"
+guide.TextColor3 = Color3.fromRGB(200, 200, 200)
+guide.Font = Enum.Font.Gotham
+guide.TextSize = 10
+guide.TextWrapped = true
+guide.Parent = mainTab
+
+local guideCorner = Instance.new("UICorner")
+guideCorner.CornerRadius = UDim.new(0, 6)
+guideCorner.Parent = guide
+
+-- ===== TAB TP =====
+local tpTab = Instance.new("Frame")
+tpTab.Size = UDim2.new(1, 0, 1, -70)
+tpTab.Position = UDim2.new(0, 0, 0, 68)
+tpTab.BackgroundTransparency = 1
+tpTab.Visible = false
+tpTab.Parent = frame
+
+local tpTitle = Instance.new("TextLabel")
+tpTitle.Size = UDim2.new(0.9, 0, 0, 20)
+tpTitle.Position = UDim2.new(0.05, 0, 0, 5)
+tpTitle.BackgroundTransparency = 1
+tpTitle.Text = "📡 DANH SÁCH NGƯỜI CHƠI:"
+tpTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+tpTitle.Font = Enum.Font.GothamBold
+tpTitle.TextSize = 12
+tpTitle.TextXAlignment = Enum.TextXAlignment.Left
+tpTitle.Parent = tpTab
+
+local playerList = Instance.new("ScrollingFrame")
+playerList.Size = UDim2.new(0.9, 0, 0, 260)
+playerList.Position = UDim2.new(0.05, 0, 0, 30)
+playerList.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+playerList.BorderSizePixel = 0
+playerList.ScrollBarThickness = 6
+playerList.CanvasSize = UDim2.new(0, 0, 0, 0)
+playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+playerList.Parent = tpTab
+
+local listCorner = Instance.new("UICorner")
+listCorner.CornerRadius = UDim.new(0, 6)
+listCorner.Parent = playerList
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 4)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = playerList
+
+local listPadding = Instance.new("UIPadding")
+listPadding.PaddingTop = UDim.new(0, 5)
+listPadding.PaddingLeft = UDim.new(0, 5)
+listPadding.PaddingRight = UDim.new(0, 5)
+listPadding.Parent = playerList
+
+local function updatePlayerList()
+    for _, child in pairs(playerList:GetChildren()) do
+        if child:IsA("Frame") then child:Destroy() end
+    end
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player then
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1, -10, 0, 30)
+            row.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+            row.BorderSizePixel = 0
+            row.Parent = playerList
+
+            local rowCorner = Instance.new("UICorner")
+            rowCorner.CornerRadius = UDim.new(0, 4)
+            rowCorner.Parent = row
+
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(0.5, 0, 1, 0)
+            nameLabel.Position = UDim2.new(0, 5, 0, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.Text = "👤 " .. p.Name
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            nameLabel.Font = Enum.Font.Gotham
+            nameLabel.TextSize = 11
+            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+            nameLabel.Parent = row
+
+            local goBtn = Instance.new("TextButton")
+            goBtn.Size = UDim2.new(0.22, 0, 0, 22)
+            goBtn.Position = UDim2.new(0.52, 0, 0, 4)
+            goBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
+            goBtn.Text = "ĐẾN"
+            goBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            goBtn.Font = Enum.Font.GothamBold
+            goBtn.TextSize = 10
+            goBtn.Parent = row
+
+            local goCorner = Instance.new("UICorner")
+            goCorner.CornerRadius = UDim.new(0, 4)
+            goCorner.Parent = goBtn
+
+            local bringBtn = Instance.new("TextButton")
+            bringBtn.Size = UDim2.new(0.22, 0, 0, 22)
+            bringBtn.Position = UDim2.new(0.76, 0, 0, 4)
+            bringBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 60)
+            bringBtn.Text = "KÉO"
+            bringBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            bringBtn.Font = Enum.Font.GothamBold
+            bringBtn.TextSize = 10
+            bringBtn.Parent = row
+
+            local bringCorner = Instance.new("UICorner")
+            bringCorner.CornerRadius = UDim.new(0, 4)
+            bringCorner.Parent = bringBtn
+
+            goBtn.MouseButton1Click:Connect(function()
+                local myChar = player.Character
+                if not myChar then return end
+                local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+                if not myHrp then return end
+                local tChar = p.Character
+                if not tChar then return end
+                local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+                if not tHrp then return end
+                myHrp.CFrame = tHrp.CFrame + Vector3.new(0, 0, 3)
+            end)
+
+            bringBtn.MouseButton1Click:Connect(function()
+                local myChar = player.Character
+                if not myChar then return end
+                local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+                if not myHrp then return end
+                local tChar = p.Character
+                if not tChar then return end
+                local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+                if not tHrp then return end
+                tHrp.CFrame = myHrp.CFrame + Vector3.new(0, 0, 3)
+            end)
+        end
+    end
+end
+
+updatePlayerList()
+Players.PlayerAdded:Connect(function() task.wait(1) updatePlayerList() end)
+Players.PlayerRemoving:Connect(updatePlayerList)
+
+-- =====================================================
+-- ===== TAB ESP (NHÌN THẤY NGƯỜI CHƠI KHÁC) =====
+-- =====================================================
+local espTab = Instance.new("Frame")
+espTab.Size = UDim2.new(1, 0, 1, -70)
+espTab.Position = UDim2.new(0, 0, 0, 68)
+espTab.BackgroundTransparency = 1
+espTab.Visible = false
+espTab.Parent = frame
+
+local espBtn = Instance.new("TextButton")
+espBtn.Size = UDim2.new(0.9, 0, 0, 32)
+espBtn.Position = UDim2.new(0.05, 0, 0, 5)
+espBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+espBtn.Text = "👁️ ESP: TẮT"
+espBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+espBtn.Font = Enum.Font.GothamBold
+espBtn.TextSize = 13
+espBtn.Parent = espTab
+
+local espCorner = Instance.new("UICorner")
+espCorner.CornerRadius = UDim.new(0, 6)
+espCorner.Parent = espBtn
+
+-- Nút bật/tắt khoảng cách
+local distBtn = Instance.new("TextButton")
+distBtn.Size = UDim2.new(0.9, 0, 0, 28)
+distBtn.Position = UDim2.new(0.05, 0, 0, 42)
+distBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
+distBtn.Text = "📏 KHOẢNG CÁCH: BẬT"
+distBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+distBtn.Font = Enum.Font.GothamBold
+distBtn.TextSize = 12
+distBtn.Parent = espTab
+
+local distCorner = Instance.new("UICorner")
+distCorner.CornerRadius = UDim.new(0, 6)
+distCorner.Parent = distBtn
+
+-- Nút bật/tắt tên
+local nameBtn = Instance.new("TextButton")
+nameBtn.Size = UDim2.new(0.9, 0, 0, 28)
+nameBtn.Position = UDim2.new(0.05, 0, 0, 75)
+nameBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
+nameBtn.Text = "📛 TÊN: BẬT"
+nameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameBtn.Font = Enum.Font.GothamBold
+nameBtn.TextSize = 12
+nameBtn.Parent = espTab
+
+local nameCorner = Instance.new("UICorner")
+nameCorner.CornerRadius = UDim.new(0, 6)
+nameCorner.Parent = nameBtn
+
+-- Nút bật/tắt khung
+local boxBtn = Instance.new("TextButton")
+boxBtn.Size = UDim2.new(0.9, 0, 0, 28)
+boxBtn.Position = UDim2.new(0.05, 0, 0, 108)
+boxBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
+boxBtn.Text = "⬜ KHUNG: BẬT"
+boxBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+boxBtn.Font = Enum.Font.GothamBold
+boxBtn.TextSize = 12
+boxBtn.Parent = espTab
+
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 6)
+boxCorner.Parent = boxBtn
+
+-- Nút bật/tắt đường chỉ
+local lineBtn = Instance.new("TextButton")
+lineBtn.Size = UDim2.new(0.9, 0, 0, 28)
+lineBtn.Position = UDim2.new(0.05, 0, 0, 141)
+lineBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
+lineBtn.Text = "📏 ĐƯỜNG CHỈ: BẬT"
+lineBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+lineBtn.Font = Enum.Font.GothamBold
+lineBtn.TextSize = 12
+lineBtn.Parent = espTab
+
+local lineCorner = Instance.new("UICorner")
+lineCorner.CornerRadius = UDim.new(0, 6)
+lineCorner.Parent = lineBtn
+
+-- Hướng dẫn
+local espGuide = Instance.new("TextLabel")
+espGuide.Size = UDim2.new(0.9, 0, 0, 80)
+espGuide.Position = UDim2.new(0.05, 0, 0, 175)
+espGuide.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+espGuide.Text = "👁️ ESP giúp bạn thấy người chơi\nkhác xuyên tường.\nBật ESP → tự động hiện tất cả."
+espGuide.TextColor3 = Color3.fromRGB(200, 200, 200)
+espGuide.Font = Enum.Font.Gotham
+espGuide.TextSize = 10
+espGuide.TextWrapped = true
+espGuide.Parent = espTab
+
+local espGuideCorner = Instance.new("UICorner")
+espGuideCorner.CornerRadius = UDim.new(0, 6)
+espGuideCorner.Parent = espGuide
+
+-- ===== LOGIC ESP =====
+local espActive = false
+local showDistance = true
+local showName = true
+local showBox = true
+local showLine = true
+local espObjects = {}   -- Lưu các object ESP để xoá sau
+
+-- Hàm tạo ESP cho 1 người chơi
+local function createESP(targetPlayer)
+    -- Xoá ESP cũ nếu có
+    if espObjects[targetPlayer] then
+        for _, obj in pairs(espObjects[targetPlayer]) do
+            if obj and obj.Parent then obj:Destroy() end
+        end
+    end
+
+    espObjects[targetPlayer] = {}
+
+    -- Highlight (làm sáng nhân vật)
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = targetPlayer.Character
+    table.insert(espObjects[targetPlayer], highlight)
+
+    -- BillboardGui hiện tên + khoảng cách
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_Billboard"
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = targetPlayer.Character:FindFirstChild("Head") or targetPlayer.Character
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Name = "ESP_Name"
+    nameLabel.Size = UDim2.new(1, 0, 0, 20)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = targetPlayer.Name
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.TextStrokeTransparency = 0
+    nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextSize = 14
+    nameLabel.Parent = billboard
+    table.insert(espObjects[targetPlayer], billboard)
+
+    local distLabel = Instance.new("TextLabel")
+    distLabel.Name = "ESP_Distance"
+    distLabel.Size = UDim2.new(1, 0, 0, 18)
+    distLabel.Position = UDim2.new(0, 0, 0, 22)
+    distLabel.BackgroundTransparency = 1
+    distLabel.Text = "0 studs"
+    distLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
+    distLabel.TextStrokeTransparency = 0
+    distLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    distLabel.Font = Enum.Font.GothamBold
+    distLabel.TextSize = 12
+    distLabel.Parent = billboard
+
+    -- Cập nhật khoảng cách liên tục
+    local distConn = RunService.RenderStepped:Connect(function()
+        if not espActive or not targetPlayer.Character then return end
+        if not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+        local myPos = player.Character.HumanoidRootPart.Position
+        local theirPos = targetPlayer.Character.HumanoidRootPart.Position
+        local dist = math.floor((myPos - theirPos).Magnitude)
+        distLabel.Text = dis
