@@ -1,577 +1,3 @@
--- DỊCH VỤ
-local P, U, R, LT = game:GetService("Players"), game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Lighting")
-local L, C = P.LocalPlayer, workspace.CurrentCamera
-
--- MÀU
-local BG, PN, IN = Color3.fromRGB(16,16,24), Color3.fromRGB(28,28,42), Color3.fromRGB(40,40,58)
-local BD, BL, CY, PU = Color3.fromRGB(70,100,180), Color3.fromRGB(88,158,240), Color3.fromRGB(80,210,220), Color3.fromRGB(160,90,220)
-local GR, RD, OR, YE, WH = Color3.fromRGB(72,200,130), Color3.fromRGB(230,80,80), Color3.fromRGB(235,150,70), Color3.fromRGB(240,200,60), Color3.fromRGB(245,245,250)
-
--- GUI
-local sg = Instance.new("ScreenGui")
-sg.Name = "ChauTool"
-sg.ResetOnSpawn = false
-sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function() sg.IgnoreGuiInset = true end)
-sg.Parent = L:WaitForChild("PlayerGui")
-
--- HÀM TIỆN
-local function corner(o,r) local c=Instance.new("UICorner",o); c.CornerRadius=UDim.new(0,r or 10); return c end
-local function stroke(o,c,t,tr) local s=Instance.new("UIStroke",o); s.Color=c or BD; s.Thickness=t or 1; s.Transparency=tr or 0.4; return s end
-local function grad(o,a,b,r) local g=Instance.new("UIGradient",o); g.Color=ColorSequence.new{ColorSequenceKeypoint.new(0,a),ColorSequenceKeypoint.new(1,b)}; g.Rotation=r or 45; return g end
-
-local function mkBtn(p,txt,y,clr,h)
-    local b = Instance.new("TextButton",p)
-    b.Size = UDim2.new(0.92,0,0,h or 30)
-    b.Position = UDim2.new(0.04,0,0,y)
-    b.BackgroundColor3 = clr or BL
-    b.Text = txt
-    b.TextColor3 = WH
-    b.Font = Enum.Font.GothamBold
-    b.TextSize = 12
-    b.AutoButtonColor = false
-    b.BorderSizePixel = 0
-    corner(b,8)
-    stroke(b,WH,1,0.85)
-    b.MouseEnter:Connect(function()
-        b.BackgroundColor3 = Color3.new(math.min(clr.R+0.15,1), math.min(clr.G+0.15,1), math.min(clr.B+0.15,1))
-    end)
-    b.MouseLeave:Connect(function() b.BackgroundColor3 = clr end)
-    return b
-end
-
-local function mkBox(p,ph,y,df)
-    local b = Instance.new("TextBox",p)
-    b.Size = UDim2.new(0.92,0,0,28)
-    b.Position = UDim2.new(0.04,0,0,y)
-    b.BackgroundColor3 = IN
-    b.PlaceholderText = ph
-    b.Text = df or ""
-    b.TextColor3 = WH
-    b.PlaceholderColor3 = Color3.fromRGB(140,140,160)
-    b.Font = Enum.Font.Gotham
-    b.TextSize = 12
-    b.BorderSizePixel = 0
-    corner(b,6)
-    stroke(b,BD,1,0.6)
-    return b
-end
-
--- ========== ĐĂNG NHẬP ==========
-local pF = Instance.new("Frame",sg)
-pF.Size = UDim2.new(0,290,0,165)
-pF.Position = UDim2.new(0.5,-145,0.5,-82)
-pF.BackgroundColor3 = BG
-pF.Active = true
-pF.Draggable = true
-pF.BorderSizePixel = 0
-corner(pF,14); stroke(pF,BL,1.5,0.3)
-
-local pT = Instance.new("TextLabel",pF)
-pT.Size = UDim2.new(1,0,0,38)
-pT.BackgroundColor3 = PN
-pT.Text = "✦ CHÂU TOOL ✦"
-pT.TextColor3 = WH
-pT.Font = Enum.Font.GothamBold
-pT.TextSize = 15
-pT.BorderSizePixel = 0
-corner(pT,14); grad(pT,BL,PU,45)
-
-local pB = mkBox(pF,"Nhập mật khẩu...",50)
-
-local eL = Instance.new("TextLabel",pF)
-eL.Size = UDim2.new(1,0,0,18)
-eL.Position = UDim2.new(0,0,0,85)
-eL.BackgroundTransparency = 1
-eL.Text = ""
-eL.TextColor3 = RD
-eL.Font = Enum.Font.GothamBold
-eL.TextSize = 11
-
-local cB = mkBtn(pF,"ĐĂNG NHẬP",112,GR,34)
-
--- ========== MENU ==========
-local mF = Instance.new("Frame",sg)
-mF.Size = UDim2.new(0,340,0,400)
-mF.Position = UDim2.new(0.5,-170,0.5,-200)
-mF.BackgroundColor3 = BG
-mF.Active = true
-mF.Draggable = true
-mF.Visible = false
-mF.BorderSizePixel = 0
-corner(mF,14); stroke(mF,BL,1.5,0.3)
-
-local tB = Instance.new("TextLabel",mF)
-tB.Size = UDim2.new(1,-80,0,36)
-tB.BackgroundColor3 = PN
-tB.Text = "✦ CHÂU TOOL ✦"
-tB.TextColor3 = WH
-tB.Font = Enum.Font.GothamBold
-tB.TextSize = 15
-tB.BorderSizePixel = 0
-corner(tB,14); grad(tB,BL,PU,45)
-
-local mnB = Instance.new("TextButton",mF)
-mnB.Size = UDim2.new(0,30,0,30)
-mnB.Position = UDim2.new(1,-68,0,3)
-mnB.BackgroundColor3 = OR
-mnB.Text = "—"
-mnB.TextColor3 = WH
-mnB.Font = Enum.Font.GothamBold
-mnB.TextSize = 14
-mnB.AutoButtonColor = false
-mnB.BorderSizePixel = 0
-corner(mnB,8); stroke(mnB,WH,1,0.7)
-
-local clB = Instance.new("TextButton",mF)
-clB.Size = UDim2.new(0,30,0,30)
-clB.Position = UDim2.new(1,-34,0,3)
-clB.BackgroundColor3 = RD
-clB.Text = "✕"
-clB.TextColor3 = WH
-clB.Font = Enum.Font.GothamBold
-clB.TextSize = 13
-clB.AutoButtonColor = false
-clB.BorderSizePixel = 0
-corner(clB,8); stroke(clB,WH,1,0.7)
-
--- 3 TABS
-local tabs, pages = {}, {}
-local tabNames = {"TRANG CHÍNH","DỊCH CHUYỂN","CÔNG CỤ"}
-for i=1,3 do
-    local t = Instance.new("TextButton",mF)
-    t.Size = UDim2.new(0.3,0,0,28)
-    t.Position = UDim2.new(0.03+(i-1)*0.32,0,0,42)
-    t.BackgroundColor3 = PN
-    t.Text = tabNames[i]
-    t.TextColor3 = Color3.fromRGB(190,190,210)
-    t.Font = Enum.Font.GothamBold
-    t.TextSize = 10
-    t.AutoButtonColor = false
-    t.BorderSizePixel = 0
-    corner(t,8); stroke(t,BD,1,0.7)
-    tabs[i] = t
-
-    local pg = Instance.new("Frame",mF)
-    pg.Size = UDim2.new(1,0,1,-78)
-    pg.Position = UDim2.new(0,0,0,78)
-    pg.BackgroundTransparency = 1
-    pg.Visible = (i==1)
-    pages[i] = pg
-
-    t.MouseButton1Click:Connect(function()
-        for j=1,3 do
-            pages[j].Visible = (j==i)
-            tabs[j].BackgroundColor3 = (j==i) and BL or PN
-            tabs[j].TextColor3 = (j==i) and WH or Color3.fromRGB(190,190,210)
-        end
-        if i==2 then updateList() end
-    end)
-end
-tabs[1].BackgroundColor3 = BL
-tabs[1].TextColor3 = WH
-local pgMain, pgTP, pgTool = pages[1], pages[2], pages[3]
-
--- NÚT NHỎ
-local mini = Instance.new("TextButton",sg)
-mini.Size = UDim2.new(0,30,0,30)
-mini.Position = UDim2.new(0,20,0.5,-15)
-mini.BackgroundColor3 = BL
-mini.Text = "✦"
-mini.TextColor3 = WH
-mini.Font = Enum.Font.GothamBold
-mini.TextSize = 16
-mini.Visible = false
-mini.Draggable = true
-mini.AutoButtonColor = false
-mini.BorderSizePixel = 0
-corner(mini,15); stroke(mini,CY,2,0.2); grad(mini,BL,PU,45)
-
-mnB.MouseButton1Click:Connect(function() mF.Visible=false; mini.Visible=true end)
-mini.MouseButton1Click:Connect(function() mF.Visible=true; mini.Visible=false end)
-clB.MouseButton1Click:Connect(function() sg:Destroy() end)
-
--- ========== TAB 1: TRANG CHÍNH ==========
-local sT1 = Instance.new("TextLabel",pgMain)
-sT1.Size = UDim2.new(0.92,0,0,18)
-sT1.Position = UDim2.new(0.04,0,0,4)
-sT1.BackgroundTransparency = 1
-sT1.Text = "◆ DI CHUYỂN"
-sT1.TextColor3 = YE
-sT1.Font = Enum.Font.GothamBold
-sT1.TextSize = 11
-sT1.TextXAlignment = Enum.TextXAlignment.Left
-
-local spdB = mkBtn(pgMain,"TỐC ĐỘ: TẮT",24,GR)
-local spdX = mkBox(pgMain,"Tốc độ chạy...",57,"100")
-local flyB = mkBtn(pgMain,"BAY: TẮT",90,BL)
-local flyX = mkBox(pgMain,"Tốc độ bay...",123,"50")
-
-local sT2 = Instance.new("TextLabel",pgMain)
-sT2.Size = UDim2.new(0.92,0,0,18)
-sT2.Position = UDim2.new(0.04,0,0,156)
-sT2.BackgroundTransparency = 1
-sT2.Text = "◆ NHÌN XUYÊN TƯỜNG (ESP)"
-sT2.TextColor3 = YE
-sT2.Font = Enum.Font.GothamBold
-sT2.TextSize = 11
-sT2.TextXAlignment = Enum.TextXAlignment.Left
-
-local espB = mkBtn(pgMain,"ESP: TẮT",176,GR)
-local espK = mkBtn(pgMain,"Khung: BẬT",208,BL)
-espK.Size = UDim2.new(0.44,0,0,24)
-espK.Position = UDim2.new(0.04,0,0,208)
-local espT = mkBtn(pgMain,"Tên: BẬT",208,BL)
-espT.Size = UDim2.new(0.44,0,0,24)
-espT.Position = UDim2.new(0.52,0,0,208)
-local espD = mkBtn(pgMain,"Khoảng cách: BẬT",236,BL)
-espD.Size = UDim2.new(0.44,0,0,24)
-espD.Position = UDim2.new(0.04,0,0,236)
-local espM = mkBtn(pgMain,"Máu: BẬT",236,BL)
-espM.Size = UDim2.new(0.44,0,0,24)
-espM.Position = UDim2.new(0.52,0,0,236)
-
--- BẢNG BAY
-local flyP = Instance.new("Frame",sg)
-flyP.Size = UDim2.new(0,170,0,170)
-flyP.Position = UDim2.new(1,-180,1,-180)
-flyP.BackgroundColor3 = BG
-flyP.BackgroundTransparency = 0.2
-flyP.Visible = false
-flyP.Draggable = true
-flyP.BorderSizePixel = 0
-corner(flyP,16); stroke(flyP,CY,1.5,0.2)
-
-local dirs = {
-    {n="▲",x=0.5,y=0.02,k="up"},
-    {n="◄",x=0.05,y=0.35,k="left"},
-    {n="■",x=0.5,y=0.35,k="forward"},
-    {n="►",x=0.95,y=0.35,k="right"},
-    {n="▼",x=0.5,y=0.68,k="down"},
-    {n="◆",x=0.5,y=0.95,k="back"},
-}
-local fI = {forward=false, back=false, left=false, right=false, up=false, down=false}
-for _,d in ipairs(dirs) do
-    local b = Instance.new("TextButton",flyP)
-    b.Size = UDim2.new(0,46,0,46)
-    b.Position = UDim2.new(d.x,-23,d.y,-23)
-    b.BackgroundColor3 = BL
-    b.Text = d.n
-    b.TextColor3 = WH
-    b.Font = Enum.Font.GothamBold
-    b.TextSize = 18
-    b.AutoButtonColor = false
-    b.BorderSizePixel = 0
-    corner(b,12); stroke(b,CY,1,0.5); grad(b,BL,CY,45)
-    b.MouseButton1Down:Connect(function() fI[d.k]=true end)
-    b.MouseButton1Up:Connect(function() fI[d.k]=false end)
-    b.MouseLeave:Connect(function() fI[d.k]=false end)
-end
-
--- TỐC ĐỘ
-local spdOn, oldSpd, spdConn = false, 16, nil
-spdB.MouseButton1Click:Connect(function()
-    spdOn = not spdOn
-    if spdOn then
-        spdB.Text = "TỐC ĐỘ: BẬT"
-        spdB.BackgroundColor3 = RD
-        local h = L.Character and L.Character:FindFirstChildOfClass("Humanoid")
-        if h then oldSpd = h.WalkSpeed end
-        spdConn = R.Heartbeat:Connect(function()
-            local c = L.Character
-            if c then
-                local h = c:FindFirstChildOfClass("Humanoid")
-                if h then h.WalkSpeed = tonumber(spdX.Text) or 100 end
-            end
-        end)
-    else
-        spdB.Text = "TỐC ĐỘ: TẮT"
-        spdB.BackgroundColor3 = GR
-        if spdConn then spdConn:Disconnect(); spdConn = nil end
-        local h = L.Character and L.Character:FindFirstChildOfClass("Humanoid")
-        if h then h.WalkSpeed = oldSpd end
-    end
-end)
-
--- BAY
-local flyOn, flyConn, flyV = false, nil, nil
-flyB.MouseButton1Click:Connect(function()
-    flyOn = not flyOn
-    if flyOn then
-        flyB.Text = "BAY: BẬT"
-        flyB.BackgroundColor3 = RD
-        flyP.Visible = true
-        local c = L.Character
-        if not c then flyOn=false; flyP.Visible=false; return end
-        local hrp = c:FindFirstChild("HumanoidRootPart")
-        if not hrp then flyOn=false; flyP.Visible=false; return end
-        flyV = Instance.new("BodyVelocity")
-        flyV.MaxForce = Vector3.new(9e9,9e9,9e9)
-        flyV.Parent = hrp
-        flyConn = R.RenderStepped:Connect(function()
-            if not flyV or not flyV.Parent then return end
-            local sp = tonumber(flyX.Text) or 50
-            local dir = Vector3.new(0,0,0)
-            local lk = C.CFrame.LookVector
-            local rt = C.CFrame.RightVector
-            if fI.forward then dir = dir + lk end
-            if fI.back then dir = dir - lk end
-            if fI.right then dir = dir + rt end
-            if fI.left then dir = dir - rt end
-            if fI.up then dir = dir + Vector3.new(0,1,0) end
-            if fI.down then dir = dir - Vector3.new(0,1,0) end
-            if U:IsKeyDown(Enum.KeyCode.W) then dir = dir + lk end
-            if U:IsKeyDown(Enum.KeyCode.S) then dir = dir - lk end
-            if U:IsKeyDown(Enum.KeyCode.A) then dir = dir - rt end
-            if U:IsKeyDown(Enum.KeyCode.D) then dir = dir + rt end
-            if U:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0,1,0) end
-            if U:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0,1,0) end
-            flyV.Velocity = dir.Magnitude > 0 and dir.Unit * sp or Vector3.new(0,0,0)
-        end)
-    else
-        flyB.Text = "BAY: TẮT"
-        flyB.BackgroundColor3 = BL
-        flyP.Visible = false
-        if flyConn then flyConn:Disconnect(); flyConn = nil end
-        if flyV then flyV:Destroy(); flyV = nil end
-        for k,_ in pairs(fI) do fI[k] = false end
-    end
-end)
-
--- ESP
-local espOn, sK, sT, sD, sM = false, true, true, true, true
-local espObj = {}
-
-local function rmESP(p)
-    if espObj[p] then
-        for _,o in pairs(espObj[p]) do
-            if o and o.Parent then o:Destroy() end
-        end
-        espObj[p] = nil
-    end
-end
-
-local function mkESP(p)
-    if not p.Character then return end
-    rmESP(p)
-    local list = {}
-    local ch = p.Character
-    local hd = ch:FindFirstChild("Head")
-    local hm = ch:FindFirstChildOfClass("Humanoid")
-
-    if sK then
-        local hl = Instance.new("Highlight")
-        hl.FillColor = RD
-        hl.OutlineColor = WH
-        hl.FillTransparency = 0.5
-        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        hl.Parent = ch
-        table.insert(list, hl)
-    end
-
-    local bb = Instance.new("BillboardGui")
-    bb.Size = UDim2.new(0,160,0,60)
-    bb.StudsOffset = Vector3.new(0,3,0)
-    bb.AlwaysOnTop = true
-    bb.Parent = hd or ch
-    table.insert(list, bb)
-
-    if sT then
-        local n = Instance.new("TextLabel",bb)
-        n.Size = UDim2.new(1,0,0,20)
-        n.BackgroundTransparency = 1
-        n.Text = p.Name
-        n.TextColor3 = WH
-        n.TextStrokeTransparency = 0
-        n.Font = Enum.Font.GothamBold
-        n.TextSize = 13
-    end
-
-    local dLbl
-    if sD then
-        dLbl = Instance.new("TextLabel",bb)
-        dLbl.Size = UDim2.new(1,0,0,18)
-        dLbl.Position = UDim2.new(0,0,0,20)
-        dLbl.BackgroundTransparency = 1
-        dLbl.Text = "..."
-        dLbl.TextColor3 = YE
-        dLbl.TextStrokeTransparency = 0
-        dLbl.Font = Enum.Font.GothamBold
-        dLbl.TextSize = 11
-    end
-
-    local hp
-    if sM and hm then
-        local bg = Instance.new("Frame",bb)
-        bg.Size = UDim2.new(0.8,0,0,6)
-        bg.Position = UDim2.new(0.1,0,0,42)
-        bg.BackgroundColor3 = Color3.fromRGB(50,50,60)
-        bg.BorderSizePixel = 0
-        corner(bg,3)
-        hp = Instance.new("Frame",bg)
-        hp.Size = UDim2.new(1,0,1,0)
-        hp.BackgroundColor3 = GR
-        hp.BorderSizePixel = 0
-        corner(hp,3)
-    end
-
-    espObj[p] = {parts=list, dist=dLbl, hp=hp}
-    espObj[p].conn = R.RenderStepped:Connect(function()
-        if not espOn or not espObj[p] then return end
-        local mc = L.Character
-        local tc = p.Character
-        if not mc or not tc then return end
-        local mh = mc:FindFirstChild("HumanoidRootPart")
-        local th = tc:FindFirstChild("HumanoidRootPart")
-        if not mh or not th then return end
-        if espObj[p].dist then
-            espObj[p].dist.Text = math.floor((mh.Position - th.Position).Magnitude) .. " studs"
-        end
-        if espObj[p].hp then
-            local h = tc:FindFirstChildOfClass("Humanoid")
-            if h then
-                local r = h.Health / h.MaxHealth
-                espObj[p].hp.Size = UDim2.new(r,0,1,0)
-                espObj[p].hp.BackgroundColor3 = r > 0.5 and GR or (r > 0.25 and YE or RD)
-            end
-        end
-    end)
-end
-
-local function upESP()
-    for _,p in pairs(P:GetPlayers()) do
-        if p ~= L then
-            if espOn then mkESP(p) else rmESP(p) end
-        end
-    end
-end
-
-espB.MouseButton1Click:Connect(function()
-    espOn = not espOn
-    espB.Text = espOn and "ESP: BẬT" or "ESP: TẮT"
-    espB.BackgroundColor3 = espOn and RD or GR
-    upESP()
-end)
-espK.MouseButton1Click:Connect(function() sK=not sK; espK.Text=sK and "Khung: BẬT" or "Khung: TẮT"; if espOn then upESP() end end)
-espT.MouseButton1Click:Connect(function() sT=not sT; espT.Text=sT and "Tên: BẬT" or "Tên: TẮT"; if espOn then upESP() end end)
-espD.MouseButton1Click:Connect(function() sD=not sD; espD.Text=sD and "Khoảng cách: BẬT" or "Khoảng cách: TẮT"; if espOn then upESP() end end)
-espM.MouseButton1Click:Connect(function() sM=not sM; espM.Text=sM and "Máu: BẬT" or "Máu: TẮT"; if espOn then upESP() end end)
-
-P.PlayerRemoving:Connect(rmESP)
-P.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function() wait(1); if espOn then mkESP(p) end end)
-end)
-
--- ========== TAB 2: DỊCH CHUYỂN ==========
-local sBox = mkBox(pgTP,"Tìm người chơi...",5,"")
-
-local list = Instance.new("ScrollingFrame",pgTP)
-list.Size = UDim2.new(0.92,0,0,270)
-list.Position = UDim2.new(0.04,0,0,40)
-list.BackgroundColor3 = IN
-list.BorderSizePixel = 0
-list.ScrollBarThickness = 5
-list.CanvasSize = UDim2.new(0,0,0,0)
-list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-corner(list,8); stroke(list,BD,1,0.5)
-Instance.new("UIListLayout",list).Padding = UDim.new(0,4)
-
-local follow = {}
-
-function updateList()
-    local fl = string.lower(sBox.Text)
-    for _,c in pairs(list:GetChildren()) do
-        if c:IsA("Frame") then c:Destroy() end
-    end
-    for _,p in pairs(P:GetPlayers()) do
-        if p ~= L then
-            if fl == "" or string.find(string.lower(p.Name),fl,1,true) then
-                local row = Instance.new("Frame",list)
-                row.Size = UDim2.new(1,-10,0,32)
-                row.BackgroundColor3 = PN
-                row.BorderSizePixel = 0
-                corner(row,6); stroke(row,BD,1,0.7)
-
-                local n = Instance.new("TextLabel",row)
-                n.Size = UDim2.new(0.4,0,1,0)
-                n.Position = UDim2.new(0,5,0,0)
-                n.BackgroundTransparency = 1
-                n.Text = p.Name
-                n.TextColor3 = WH
-                n.Font = Enum.Font.Gotham
-                n.TextSize = 10
-                n.TextXAlignment = Enum.TextXAlignment.Left
-                n.TextTruncate = Enum.TextTruncate.AtEnd
-
-                local function sB(txt,x,clr)
-                    local b = Instance.new("TextButton",row)
-                    b.Size = UDim2.new(0.18,0,0,22)
-                    b.Position = UDim2.new(x,0,0,5)
-                    b.BackgroundColor3 = clr
-                    b.Text = txt
-                    b.TextColor3 = WH
-                    b.Font = Enum.Font.GothamBold
-                    b.TextSize = 9
-                    b.AutoButtonColor = false
-                    b.BorderSizePixel = 0
-                    corner(b,5); stroke(b,WH,1,0.85)
-                    return b
-                end
-
-                local dB = sB("ĐẾN",0.4,BL)
-                local kB = sB("KÉO",0.6,OR)
-                local tB2 = sB("THEO",0.8,PU)
-
-                dB.MouseButton1Click:Connect(function()
-                    local mc, tc = L.Character, p.Character
-                    if mc and tc then
-                        local mh = mc:FindFirstChild("HumanoidRootPart")
-                        local th = tc:FindFirstChild("HumanoidRootPart")
-                        if mh and th then mh.CFrame = th.CFrame + Vector3.new(0,0,3) end
-                    end
-                end)
-
-                kB.MouseButton1Click:Connect(function()
-                    local mc, tc = L.Character, p.Character
-                    if mc and tc then
-                        local mh = mc:FindFirstChild("HumanoidRootPart")
-                        local th = tc:FindFirstChild("HumanoidRootPart")
-                        if mh and th then th.CFrame = mh.CFrame + Vector3.new(0,0,3) end
-                    end
-                end)
-
-                tB2.MouseButton1Click:Connect(function()
-                    if follow[p] then
-                        follow[p]:Disconnect()
-                        follow[p] = nil
-                        tB2.Text = "THEO"
-                        tB2.BackgroundColor3 = PU
-                    else
-                        tB2.Text = "THẢ"
-                        tB2.BackgroundColor3 = RD
-                        follow[p] = R.Heartbeat:Connect(function()
-                            local mc = L.Character
-                            local tc = p.Character
-                            if not mc or not tc then return end
-                            local mh = mc:FindFirstChild("HumanoidRootPart")
-                            local th = tc:FindFirstChild("HumanoidRootPart")
-                            if mh and th then th.CFrame = mh.CFrame + Vector3.new(3,0,3) end
-                        end)
-                    end
-                end)
-            end
-        end
-    end
-end
-
-sBox:GetPropertyChangedSignal("Text"):Connect(updateList)
-updateList()
-P.PlayerAdded:Connect(function() wait(1); updateList() end)
-P.PlayerRemoving:Connect(function(p)
-    if follow[p] then follow[p]:Disconnect() end
-    updateList()
-end)
-
 -- ========== TAB 3: CÔNG CỤ ==========
 local ncB = mkBtn(pgTool,"XUYÊN TƯỜNG: TẮT",5,GR)
 local ivB = mkBtn(pgTool,"TÀNG HÌNH: TẮT",38,GR)
@@ -579,7 +5,99 @@ local fbB = mkBtn(pgTool,"ÁNH SÁNG: TẮT",71,GR)
 local bhB = mkBtn(pgTool,"NHẢY LIÊN TỤC: TẮT",104,GR)
 local ijB = mkBtn(pgTool,"NHẢY VÔ HẠN: TẮT",137,GR)
 
--- NOCLIP
+-- Chọn mục tiêu
+local targetLabel = Instance.new("TextLabel",pgTool)
+targetLabel.Size = UDim2.new(0.92,0,0,18)
+targetLabel.Position = UDim2.new(0.04,0,0,172)
+targetLabel.BackgroundTransparency = 1
+targetLabel.Text = "◆ CHỌN MỤC TIÊU ĐỂ TROLL"
+targetLabel.TextColor3 = YE
+targetLabel.Font = Enum.Font.GothamBold
+targetLabel.TextSize = 11
+targetLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Dropdown chọn người chơi
+local targetBtn = mkBtn(pgTool,"MỤC TIÊU: CHƯA CHỌN",190,OR,26)
+
+-- Danh sách chọn (ẩn mặc định)
+local targetList = Instance.new("ScrollingFrame",pgTool)
+targetList.Size = UDim2.new(0.92,0,0,120)
+targetList.Position = UDim2.new(0.04,0,0,218)
+targetList.BackgroundColor3 = IN
+targetList.BorderSizePixel = 0
+targetList.ScrollBarThickness = 5
+targetList.CanvasSize = UDim2.new(0,0,0,0)
+targetList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+targetList.Visible = false
+corner(targetList,8); stroke(targetList,BD,1,0.5)
+Instance.new("UIListLayout",targetList).Padding = UDim.new(0,3)
+
+local selectedPlayer = nil
+
+local function updateTargetList()
+    for _,c in pairs(targetList:GetChildren()) do
+        if c:IsA("TextButton") then c:Destroy() end
+    end
+    for _,p in pairs(P:GetPlayers()) do
+        if p ~= L then
+            local b = Instance.new("TextButton",targetList)
+            b.Size = UDim2.new(1,-8,0,24)
+            b.BackgroundColor3 = PN
+            b.Text = p.Name
+            b.TextColor3 = WH
+            b.Font = Enum.Font.GothamBold
+            b.TextSize = 10
+            b.AutoButtonColor = false
+            b.BorderSizePixel = 0
+            corner(b,5)
+            b.MouseButton1Click:Connect(function()
+                selectedPlayer = p
+                targetBtn.Text = "MỤC TIÊU: " .. p.Name
+                targetList.Visible = false
+            end)
+        end
+    end
+end
+
+targetBtn.MouseButton1Click:Connect(function()
+    updateTargetList()
+    targetList.Visible = not targetList.Visible
+end)
+
+-- Các nút TROLL
+local trollSound = mkBtn(pgTool,"🔊 ÂM THANH",348,BL,24)
+trollSound.Size = UDim2.new(0.44,0,0,24)
+trollSound.Position = UDim2.new(0.04,0,0,348)
+
+local trollShake = mkBtn(pgTool,"💥 RUNG LẮC",348,RD,24)
+trollShake.Size = UDim2.new(0.44,0,0,24)
+trollShake.Position = UDim2.new(0.52,0,0,348)
+
+local trollFire = mkBtn(pgTool,"🔥 ĐỐT CHÁY",378,OR,24)
+trollFire.Size = UDim2.new(0.44,0,0,24)
+trollFire.Position = UDim2.new(0.04,0,0,378)
+
+local trollFreeze = mkBtn(pgTool,"❄️ ĐÓNG BĂNG",378,CY,24)
+trollFreeze.Size = UDim2.new(0.44,0,0,24)
+trollFreeze.Position = UDim2.new(0.52,0,0,378)
+
+local trollLaunch = mkBtn(pgTool,"🚀 BẮN BAY",408,PU,24)
+trollLaunch.Size = UDim2.new(0.44,0,0,24)
+trollLaunch.Position = UDim2.new(0.04,0,0,408)
+
+local trollSpin = mkBtn(pgTool,"🌀 XOAY VÒNG",408,YE,24)
+trollSpin.Size = UDim2.new(0.44,0,0,24)
+trollSpin.Position = UDim2.new(0.52,0,0,408)
+
+local trollGhost = mkBtn(pgTool,"👻 BÓNG MA",438,BL,24)
+trollGhost.Size = UDim2.new(0.44,0,0,24)
+trollGhost.Position = UDim2.new(0.04,0,0,438)
+
+local trollBoom = mkBtn(pgTool,"💣 BÙM",438,RD,24)
+trollBoom.Size = UDim2.new(0.44,0,0,24)
+trollBoom.Position = UDim2.new(0.52,0,0,438)
+
+-- ========== NOCLIP ==========
 local ncOn, ncConn = false, nil
 ncB.MouseButton1Click:Connect(function()
     ncOn = not ncOn
@@ -599,7 +117,7 @@ ncB.MouseButton1Click:Connect(function()
     end
 end)
 
--- TÀNG HÌNH
+-- ========== TÀNG HÌNH ==========
 local ivOn = false
 local function setInvis(v)
     local c = L.Character
@@ -616,7 +134,7 @@ ivB.MouseButton1Click:Connect(function()
 end)
 L.CharacterAdded:Connect(function() if ivOn then wait(0.5); setInvis(true) end end)
 
--- FULLBRIGHT
+-- ========== FULLBRIGHT ==========
 local fbOn = false
 fbB.MouseButton1Click:Connect(function()
     fbOn = not fbOn
@@ -635,7 +153,7 @@ fbB.MouseButton1Click:Connect(function()
     end
 end)
 
--- BUNNY HOP
+-- ========== BUNNY HOP ==========
 local bhOn, bhConn = false, nil
 bhB.MouseButton1Click:Connect(function()
     bhOn = not bhOn
@@ -653,7 +171,7 @@ bhB.MouseButton1Click:Connect(function()
     end
 end)
 
--- NHẢY VÔ HẠN
+-- ========== NHẢY VÔ HẠN ==========
 local ijOn = false
 ijB.MouseButton1Click:Connect(function()
     ijOn = not ijOn
@@ -670,15 +188,155 @@ U.JumpRequest:Connect(function()
     end
 end)
 
--- ========== XÁC NHẬN ==========
-cB.MouseButton1Click:Connect(function()
-    if pB.Text == "matcuoi290" then
-        pF.Visible = false
-        mF.Visible = true
-        updateList()
-    else
-        eL.Text = "Sai mật khẩu!"
-        pB.Text = ""
-    end
+-- ========== TROLL: ÂM THANH ==========
+local soundList = {"rbxassetid://9047612847","rbxassetid://6895079853","rbxassetid://6609636360","rbxassetid://1836170244","rbxassetid://3751156367"}
+trollSound.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local hd = selectedPlayer.Character:FindFirstChild("Head")
+    if not hd then return end
+    local s = Instance.new("Sound",hd)
+    s.SoundId = soundList[math.random(1,#soundList)]
+    s.Volume = 5
+    s.PlayOnRemove = false
+    s:Play()
+    game:GetService("Debris"):AddItem(s,5)
+    trollSound.BackgroundColor3 = YE
+    wait(0.2)
+    trollSound.BackgroundColor3 = BL
 end)
-pB.FocusLost:Connect(function(e) if e then cB:Activate() end end)
+
+-- ========== TROLL: RUNG LẮC ==========
+trollShake.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local startPos = hrp.CFrame
+    local conn
+    local count = 0
+    conn = R.Heartbeat:Connect(function()
+        count = count + 1
+        if count > 60 then conn:Disconnect(); return end
+        local hd = selectedPlayer.Character
+        if not hd then conn:Disconnect(); return end
+        local h = hd:FindFirstChild("HumanoidRootPart")
+        if not h then conn:Disconnect(); return end
+        h.CFrame = startPos * CFrame.new(
+            math.random(-3,3)/10,
+            math.random(-3,3)/10,
+            math.random(-3,3)/10
+        )
+    end)
+    game:GetService("Debris"):AddItem(Instance.new("Folder"),0)
+    trollShake.BackgroundColor3 = YE
+    wait(1)
+    trollShake.BackgroundColor3 = RD
+end)
+
+-- ========== TROLL: ĐỐT CHÁY ==========
+trollFire.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local char = selectedPlayer.Character
+    for _,pt in pairs(char:GetDescendants()) do
+        if pt:IsA("BasePart") and pt.Name ~= "HumanoidRootPart" then
+            local f = Instance.new("Fire",pt)
+            f.Size = 5
+            f.Heat = 10
+            game:GetService("Debris"):AddItem(f,5)
+        end
+    end
+    trollFire.BackgroundColor3 = YE
+    wait(0.2)
+    trollFire.BackgroundColor3 = OR
+end)
+
+-- ========== TROLL: ĐÓNG BĂNG ==========
+local frozenPlayers = {}
+trollFreeze.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if frozenPlayers[selectedPlayer] then
+        frozenPlayers[selectedPlayer]:Destroy()
+        frozenPlayers[selectedPlayer] = nil
+    else
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+        bv.Velocity = Vector3.new(0,0,0)
+        bv.Parent = hrp
+        frozenPlayers[selectedPlayer] = bv
+        selectedPlayer.CharacterAdded:Connect(function()
+            if frozenPlayers[selectedPlayer] then frozenPlayers[selectedPlayer]:Destroy(); frozenPlayers[selectedPlayer] = nil end
+        end)
+    end
+    trollFreeze.BackgroundColor3 = YE
+    wait(0.2)
+    trollFreeze.BackgroundColor3 = CY
+end)
+
+-- ========== TROLL: BẮN BAY ==========
+trollLaunch.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+    bv.Velocity = Vector3.new(math.random(-50,50),300,math.random(-50,50))
+    bv.Parent = hrp
+    game:GetService("Debris"):AddItem(bv,3)
+    trollLaunch.BackgroundColor3 = YE
+    wait(0.2)
+    trollLaunch.BackgroundColor3 = PU
+end)
+
+-- ========== TROLL: XOAY VÒNG ==========
+trollSpin.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local av = Instance.new("AngularVelocity")
+    av.MaxTorque = Vector3.new(9e9,9e9,9e9)
+    av.AngularVelocity = Vector3.new(0,50,0)
+    av.Parent = hrp
+    game:GetService("Debris"):AddItem(av,3)
+    trollSpin.BackgroundColor3 = YE
+    wait(0.2)
+    trollSpin.BackgroundColor3 = YE
+end)
+
+-- ========== TROLL: BÓNG MA ==========
+trollGhost.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local char = selectedPlayer.Character
+    for _,pt in pairs(char:GetDescendants()) do
+        if pt:IsA("BasePart") or pt:IsA("Decal") then
+            pt.Transparency = 0.7
+        end
+    end
+    wait(3)
+    if selectedPlayer.Character then
+        for _,pt in pairs(selectedPlayer.Character:GetDescendants()) do
+            if pt:IsA("BasePart") or pt:IsA("Decal") then
+                pt.Transparency = 0
+            end
+        end
+    end
+    trollGhost.BackgroundColor3 = YE
+    wait(0.2)
+    trollGhost.BackgroundColor3 = BL
+end)
+
+-- ========== TROLL: BÙM ==========
+trollBoom.MouseButton1Click:Connect(function()
+    if not selectedPlayer or not selectedPlayer.Character then return end
+    local hrp = selectedPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local ex = Instance.new("Explosion")
+    ex.Position = hrp.Position
+    ex.BlastRadius = 20
+    ex.BlastPressure = 500000
+    ex.DestroyJointRadiusPercent = 0
+    ex.Parent = workspace
+    trollBoom.BackgroundColor3 = YE
+    wait(0.2)
+    trollBoom.BackgroundColor3 = RD
+end)
