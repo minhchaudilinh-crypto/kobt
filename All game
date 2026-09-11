@@ -8,7 +8,7 @@ local cam = workspace.CurrentCamera
 local sg = Instance.new("ScreenGui")
 sg.Name = "ChauGui"
 sg.ResetOnSpawn = false
-sg.IgnoreGuiInset = true
+pcall(function() sg.IgnoreGuiInset = true end)
 sg.Parent = LP:WaitForChild("PlayerGui")
 
 -- ===== MÀU =====
@@ -20,6 +20,7 @@ local PURPLE = Color3.fromRGB(160, 90, 240)
 local GREEN = Color3.fromRGB(60, 200, 120)
 local RED = Color3.fromRGB(220, 70, 70)
 local ORANGE = Color3.fromRGB(230, 140, 60)
+local YELLOW = Color3.fromRGB(240, 200, 60)
 
 -- ===== HÀM TẠO NÚT =====
 local function makeBtn(parent, txt, y, h, clr, size)
@@ -36,10 +37,9 @@ local function makeBtn(parent, txt, y, h, clr, size)
     return b
 end
 
--- ===== HÀM TẠO Ô NHẬP =====
 local function makeBox(parent, ph, y, txt)
     local b = Instance.new("TextBox", parent)
-    b.Size = UDim2.new(0.92, 0, 0, 30)
+    b.Size = UDim2.new(0.92, 0, 0, 28)
     b.Position = UDim2.new(0.04, 0, 0, y)
     b.BackgroundColor3 = INPUT
     b.PlaceholderText = ph
@@ -66,13 +66,13 @@ Instance.new("UICorner", pf).CornerRadius = UDim.new(0, 12)
 local pt = Instance.new("TextLabel", pf)
 pt.Size = UDim2.new(1, 0, 0, 32)
 pt.BackgroundColor3 = PANEL
-pt.Text = "🔒 ĐĂNG NHẬP"
+pt.Text = "DANG NHAP"
 pt.TextColor3 = Color3.fromRGB(255, 255, 255)
 pt.Font = Enum.Font.GothamBold
 pt.TextSize = 14
 Instance.new("UICorner", pt).CornerRadius = UDim.new(0, 12)
 
-local pb = makeBox(pf, "Nhập mật khẩu...", 45)
+local pb = makeBox(pf, "Nhap mat khau...", 45)
 
 local tbx = Instance.new("TextLabel", pf)
 tbx.Size = UDim2.new(1, 0, 0, 20)
@@ -83,7 +83,7 @@ tbx.TextColor3 = RED
 tbx.Font = Enum.Font.GothamBold
 tbx.TextSize = 12
 
-local cbtn = makeBtn(pf, "✅ XÁC NHẬN", 105, 32, GREEN, 13)
+local cbtn = makeBtn(pf, "XAC NHAN", 105, 32, GREEN, 13)
 
 -- =====================================================
 -- ===== MENU CHÍNH =====
@@ -100,7 +100,7 @@ Instance.new("UICorner", mf).CornerRadius = UDim.new(0, 14)
 local title = Instance.new("TextLabel", mf)
 title.Size = UDim2.new(1, -80, 0, 34)
 title.BackgroundColor3 = PANEL
-title.Text = "⚡ CHÂU TOOL ⚡"
+title.Text = "CHAU TOOL"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 15
@@ -117,10 +117,10 @@ local minB = Instance.new("TextButton", mf)
 minB.Size = UDim2.new(0, 32, 0, 30)
 minB.Position = UDim2.new(1, -72, 0, 2)
 minB.BackgroundColor3 = ORANGE
-minB.Text = "➖"
+minB.Text = "-"
 minB.TextColor3 = Color3.fromRGB(255, 255, 255)
 minB.Font = Enum.Font.GothamBold
-minB.TextSize = 16
+minB.TextSize = 18
 minB.AutoButtonColor = false
 Instance.new("UICorner", minB).CornerRadius = UDim.new(0, 8)
 
@@ -128,15 +128,15 @@ local closeB = Instance.new("TextButton", mf)
 closeB.Size = UDim2.new(0, 32, 0, 30)
 closeB.Position = UDim2.new(1, -36, 0, 2)
 closeB.BackgroundColor3 = RED
-closeB.Text = "❌"
+closeB.Text = "X"
 closeB.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeB.Font = Enum.Font.GothamBold
-closeB.TextSize = 14
+closeB.TextSize = 16
 closeB.AutoButtonColor = false
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(0, 8)
 
 -- ===== 4 TABS =====
-local tabNames = {"🏠 MAIN", "📡 TP", "👁️ ESP", "🛠️ TOOL"}
+local tabNames = {"MAIN", "TP", "ESP", "TOOL"}
 local tabs, pages = {}, {}
 for i, name in ipairs(tabNames) do
     local x = 0.02 + (i-1) * 0.245
@@ -147,7 +147,7 @@ for i, name in ipairs(tabNames) do
     t.Text = name
     t.TextColor3 = Color3.fromRGB(200, 200, 200)
     t.Font = Enum.Font.GothamBold
-    t.TextSize = 10
+    t.TextSize = 11
     t.AutoButtonColor = false
     Instance.new("UICorner", t).CornerRadius = UDim.new(0, 8)
     tabs[i] = t
@@ -177,7 +177,7 @@ local mini = Instance.new("TextButton", sg)
 mini.Size = UDim2.new(0, 55, 0, 55)
 mini.Position = UDim2.new(0, 20, 0.5, -27)
 mini.BackgroundColor3 = BLUE
-mini.Text = "⚡"
+mini.Text = "C"
 mini.TextColor3 = Color3.fromRGB(255, 255, 255)
 mini.Font = Enum.Font.GothamBold
 mini.TextSize = 26
@@ -207,23 +207,24 @@ closeB.MouseButton1Click:Connect(function() sg:Destroy() end)
 -- =====================================================
 -- ===== TAB MAIN =====
 -- =====================================================
-local speedBtn = makeBtn(pageMain, "⚡ SPEED: TẮT", 8, 32, GREEN, 13)
-local speedBox = makeBox(pageMain, "Tốc độ chạy...", 46, "100")
-local flyBtn = makeBtn(pageMain, "🕊️ BAY: TẮT", 84, 32, BLUE, 13)
-local flySpeedBox = makeBox(pageMain, "Tốc độ bay...", 122, "50")
+local speedBtn = makeBtn(pageMain, "SPEED: TAT", 8, 32, GREEN, 13)
+local speedBox = makeBox(pageMain, "Toc do chay...", 46, "100")
+local flyBtn = makeBtn(pageMain, "BAY: TAT", 82, 32, BLUE, 13)
+local flySpeedBox = makeBox(pageMain, "Toc do bay...", 120, "50")
 
 local hint = Instance.new("TextLabel", pageMain)
-hint.Size = UDim2.new(0.92, 0, 0, 70)
-hint.Position = UDim2.new(0.04, 0, 0, 160)
+hint.Size = UDim2.new(0.92, 0, 0, 90)
+hint.Position = UDim2.new(0.04, 0, 0, 156)
 hint.BackgroundColor3 = PANEL
-hint.Text = "🎮 BAY:\n• Mobile: 6 nút góc phải\n• PC: W/A/S/D + Space/Shift"
+hint.Text = "BAY:\n- Mobile: 6 nut goc phai\n- PC: W/A/S/D + Space/Shift\n- Nhan Space de len, LeftShift de xuong"
 hint.TextColor3 = Color3.fromRGB(180, 180, 200)
 hint.Font = Enum.Font.Gotham
 hint.TextSize = 11
 hint.TextWrapped = true
+hint.TextYAlignment = Enum.TextYAlignment.Top
 Instance.new("UICorner", hint).CornerRadius = UDim.new(0, 8)
 
--- Nút bay
+-- Nút bay ngoài màn hình
 local fc = Instance.new("Frame", sg)
 fc.Size = UDim2.new(0, 170, 0, 170)
 fc.Position = UDim2.new(1, -180, 1, -180)
@@ -235,12 +236,12 @@ fc.Draggable = true
 Instance.new("UICorner", fc).CornerRadius = UDim.new(0, 14)
 
 local dirs = {
-    {n="⬆️", x=0.5, y=0.02, d="up"},
-    {n="⬅️", x=0.05, y=0.35, d="left"},
-    {n="🔼", x=0.5, y=0.35, d="forward"},
-    {n="➡️", x=0.95, y=0.35, d="right"},
-    {n="⬇️", x=0.5, y=0.68, d="down"},
-    {n="🔽", x=0.5, y=0.95, d="back"},
+    {n="UP", x=0.5, y=0.02, d="up"},
+    {n="LEFT", x=0.05, y=0.35, d="left"},
+    {n="FWD", x=0.5, y=0.35, d="forward"},
+    {n="RIGHT", x=0.95, y=0.35, d="right"},
+    {n="DOWN", x=0.5, y=0.68, d="down"},
+    {n="BACK", x=0.5, y=0.95, d="back"},
 }
 local fDirs = {forward=false, back=false, left=false, right=false, up=false, down=false}
 for _, d in ipairs(dirs) do
@@ -251,7 +252,7 @@ for _, d in ipairs(dirs) do
     b.Text = d.n
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.GothamBold
-    b.TextSize = 18
+    b.TextSize = 10
     b.AutoButtonColor = false
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
     b.MouseButton1Down:Connect(function() fDirs[d.d] = true end)
@@ -264,7 +265,7 @@ local isSpeed, oldSpeed, speedConn = false, 16, nil
 speedBtn.MouseButton1Click:Connect(function()
     isSpeed = not isSpeed
     if isSpeed then
-        speedBtn.Text = "⚡ SPEED: BẬT"
+        speedBtn.Text = "SPEED: BAT"
         speedBtn.BackgroundColor3 = RED
         local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
         if h then oldSpeed = h.WalkSpeed end
@@ -276,7 +277,7 @@ speedBtn.MouseButton1Click:Connect(function()
             end
         end)
     else
-        speedBtn.Text = "⚡ SPEED: TẮT"
+        speedBtn.Text = "SPEED: TAT"
         speedBtn.BackgroundColor3 = GREEN
         if speedConn then speedConn:Disconnect(); speedConn = nil end
         local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
@@ -289,7 +290,7 @@ local isFly, flyConn, bv = false, nil, nil
 flyBtn.MouseButton1Click:Connect(function()
     isFly = not isFly
     if isFly then
-        flyBtn.Text = "🕊️ BAY: BẬT"
+        flyBtn.Text = "BAY: BAT"
         flyBtn.BackgroundColor3 = RED
         fc.Visible = true
         local c = LP.Character
@@ -321,7 +322,7 @@ flyBtn.MouseButton1Click:Connect(function()
             bv.Velocity = dir.Magnitude > 0 and dir.Unit * sp or Vector3.new(0, 0, 0)
         end)
     else
-        flyBtn.Text = "🕊️ BAY: TẮT"
+        flyBtn.Text = "BAY: TAT"
         flyBtn.BackgroundColor3 = BLUE
         fc.Visible = false
         if flyConn then flyConn:Disconnect(); flyConn = nil end
@@ -333,7 +334,7 @@ end)
 -- =====================================================
 -- ===== TAB TP =====
 -- =====================================================
-local searchBox = makeBox(pageTP, "🔍 Tìm người chơi...", 5, "")
+local searchBox = makeBox(pageTP, "Tim nguoi choi...", 5, "")
 
 local playerList = Instance.new("ScrollingFrame", pageTP)
 playerList.Size = UDim2.new(0.92, 0, 0, 240)
@@ -370,7 +371,7 @@ function updatePlayerList()
                 n.Size = UDim2.new(0.4, 0, 1, 0)
                 n.Position = UDim2.new(0, 5, 0, 0)
                 n.BackgroundTransparency = 1
-                n.Text = "👤 " .. p.Name
+                n.Text = p.Name
                 n.TextColor3 = Color3.fromRGB(255, 255, 255)
                 n.Font = Enum.Font.Gotham
                 n.TextSize = 10
@@ -391,8 +392,8 @@ function updatePlayerList()
                     return b
                 end
 
-                local gb = sBtn("ĐẾN", 0.4, BLUE)
-                local bb = sBtn("KÉO", 0.6, ORANGE)
+                local gb = sBtn("DEN", 0.4, BLUE)
+                local bb = sBtn("KEO", 0.6, ORANGE)
                 local kb = sBtn("THEO", 0.8, PURPLE)
 
                 gb.MouseButton1Click:Connect(function()
@@ -421,7 +422,7 @@ function updatePlayerList()
                         kb.Text = "THEO"
                     else
                         kb.BackgroundColor3 = RED
-                        kb.Text = "THẢ"
+                        kb.Text = "THA"
                         keepConns[p] = RS.Heartbeat:Connect(function()
                             local mc = LP.Character
                             local tc = p.Character
@@ -449,66 +450,195 @@ Players.PlayerRemoving:Connect(function(p)
 end)
 
 -- =====================================================
--- ===== TAB ESP =====
+-- ===== TAB ESP (NÂNG CẤP) =====
 -- =====================================================
-local espBtn = makeBtn(pageESP, "👁️ ESP: TẮT", 8, 35, GREEN, 13)
+-- Nút bật/tắt ESP tổng
+local espBtn = makeBtn(pageESP, "ESP: TAT", 5, 30, GREEN, 12)
 
-local espActive, espObjects = false, {}
+-- Nút bật/tắt từng phần
+local espBoxBtn = makeBtn(pageESP, "Khung: BAT", 40, 26, BLUE, 11)
+local espNameBtn = makeBtn(pageESP, "Ten: BAT", 68, 26, BLUE, 11)
+local espDistBtn = makeBtn(pageESP, "Khoang cach: BAT", 96, 26, BLUE, 11)
+local espHpBtn = makeBtn(pageESP, "Thanh mau: BAT", 124, 26, BLUE, 11)
+local espLineBtn = makeBtn(pageESP, "Duong chi: TAT", 152, 26, BLUE, 11)
+local espTeamBtn = makeBtn(pageESP, "Doi mau doi thu: TAT", 180, 26, BLUE, 11)
 
+-- Ghi chú
+local espNote = Instance.new("TextLabel", pageESP)
+espNote.Size = UDim2.new(0.92, 0, 0, 50)
+espNote.Position = UDim2.new(0.04, 0, 0, 210)
+espNote.BackgroundColor3 = PANEL
+espNote.Text = "ESP hien thi nguoi choi khac\nxuyen tuong + thong tin"
+espNote.TextColor3 = Color3.fromRGB(180, 180, 200)
+espNote.Font = Enum.Font.Gotham
+espNote.TextSize = 10
+espNote.TextWrapped = true
+Instance.new("UICorner", espNote).CornerRadius = UDim.new(0, 6)
+
+-- Biến cấu hình
+local espActive = false
+local showBox = true
+local showName = true
+local showDist = true
+local showHp = true
+local showLine = false
+local showTeam = false
+
+local espObjects = {}
+
+-- Hàm tạo ESP cho 1 người
 local function createESP(p)
     if not p.Character then return end
-    espObjects[p] = {}
-    local hl = Instance.new("Highlight")
-    hl.FillColor = RED
-    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-    hl.FillTransparency = 0.5
-    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    hl.Parent = p.Character
-    table.insert(espObjects[p], hl)
+    if espObjects[p] then removeESP(p) end
+    espObjects[p] = {parts = {}}
 
+    local char = p.Character
+    local head = char:FindFirstChild("Head")
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+
+    -- Khung (Highlight)
+    if showBox then
+        local hl = Instance.new("Highlight")
+        hl.FillColor = RED
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.5
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        hl.Parent = char
+        table.insert(espObjects[p].parts, hl)
+    end
+
+    -- Billboard (tên + khoảng cách + máu)
     local bb = Instance.new("BillboardGui")
-    bb.Size = UDim2.new(0, 150, 0, 40)
+    bb.Size = UDim2.new(0, 150, 0, 70)
     bb.StudsOffset = Vector3.new(0, 3, 0)
     bb.AlwaysOnTop = true
-    bb.Parent = p.Character:FindFirstChild("Head") or p.Character
+    bb.Parent = head or char
+    table.insert(espObjects[p].parts, bb)
 
-    local nm = Instance.new("TextLabel", bb)
-    nm.Size = UDim2.new(1, 0, 0, 20)
-    nm.BackgroundTransparency = 1
-    nm.Text = p.Name
-    nm.TextColor3 = Color3.fromRGB(255, 255, 255)
-    nm.TextStrokeTransparency = 0
-    nm.Font = Enum.Font.GothamBold
-    nm.TextSize = 13
+    -- Tên
+    if showName then
+        local nm = Instance.new("TextLabel", bb)
+        nm.Size = UDim2.new(1, 0, 0, 20)
+        nm.BackgroundTransparency = 1
+        nm.Text = p.Name
+        nm.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nm.TextStrokeTransparency = 0
+        nm.Font = Enum.Font.GothamBold
+        nm.TextSize = 13
+        espObjects[p].name = nm
+    end
 
-    local dl = Instance.new("TextLabel", bb)
-    dl.Size = UDim2.new(1, 0, 0, 18)
-    dl.Position = UDim2.new(0, 0, 0, 20)
-    dl.BackgroundTransparency = 1
-    dl.Text = "..."
-    dl.TextColor3 = Color3.fromRGB(255, 255, 100)
-    dl.TextStrokeTransparency = 0
-    dl.Font = Enum.Font.GothamBold
-    dl.TextSize = 11
+    -- Khoảng cách
+    if showDist then
+        local dl = Instance.new("TextLabel", bb)
+        dl.Size = UDim2.new(1, 0, 0, 18)
+        dl.Position = UDim2.new(0, 0, 0, 20)
+        dl.BackgroundTransparency = 1
+        dl.Text = "..."
+        dl.TextColor3 = YELLOW
+        dl.TextStrokeTransparency = 0
+        dl.Font = Enum.Font.GothamBold
+        dl.TextSize = 11
+        espObjects[p].dist = dl
+    end
 
-    table.insert(espObjects[p], bb)
+    -- Thanh máu
+    if showHp and hum then
+        local hpBg = Instance.new("Frame", bb)
+        hpBg.Size = UDim2.new(0.8, 0, 0, 6)
+        hpBg.Position = UDim2.new(0.1, 0, 0, 40)
+        hpBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        hpBg.BorderSizePixel = 0
+        Instance.new("UICorner", hpBg).CornerRadius = UDim.new(0, 3)
 
+        local hpBar = Instance.new("Frame", hpBg)
+        hpBar.Size = UDim2.new(1, 0, 1, 0)
+        hpBar.BackgroundColor3 = GREEN
+        hpBar.BorderSizePixel = 0
+        Instance.new("UICorner", hpBar).CornerRadius = UDim.new(0, 3)
+
+        espObjects[p].hpBar = hpBar
+        espObjects[p].hpText = hpBg
+    end
+
+    -- Đường chỉ (Line)
+    if showLine and head then
+        local line = Instance.new("Frame", sg)
+        line.BackgroundColor3 = RED
+        line.BorderSizePixel = 0
+        line.Size = UDim2.new(0, 1, 0, 1)
+        line.ZIndex = 999
+        espObjects[p].line = line
+    end
+
+    -- Cập nhật liên tục
     local conn = RS.RenderStepped:Connect(function()
         if not espActive then return end
-        if not p.Character or not LP.Character then return end
-        local a = p.Character:FindFirstChild("HumanoidRootPart")
-        local b = LP.Character:FindFirstChild("HumanoidRootPart")
-        if a and b then dl.Text = math.floor((a.Position - b.Position).Magnitude) .. " studs" end
+        local myChar = LP.Character
+        if not myChar then return end
+        local myHrp = myChar:FindFirstChild("HumanoidRootPart")
+        if not myHrp then return end
+
+        local tChar = p.Character
+        if not tChar then return end
+        local tHead = tChar:FindFirstChild("Head")
+        local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+        if not tHrp or not tHead then return end
+
+        -- Khoảng cách
+        if espObjects[p].dist then
+            local dist = math.floor((myHrp.Position - tHrp.Position).Magnitude)
+            espObjects[p].dist.Text = dist .. " studs"
+        end
+
+        -- Thanh máu
+        if espObjects[p].hpBar then
+            local h = tChar:FindFirstChildOfClass("Humanoid")
+            if h then
+                local ratio = h.Health / h.MaxHealth
+                espObjects[p].hpBar.Size = UDim2.new(ratio, 0, 1, 0)
+                if ratio > 0.5 then
+                    espObjects[p].hpBar.BackgroundColor3 = GREEN
+                elseif ratio > 0.25 then
+                    espObjects[p].hpBar.BackgroundColor3 = YELLOW
+                else
+                    espObjects[p].hpBar.BackgroundColor3 = RED
+                end
+            end
+        end
+
+        -- Đường chỉ
+        if espObjects[p].line then
+            local headPos, onScreen = cam:WorldToViewportPoint(tHead.Position)
+            if onScreen then
+                local startX = cam.ViewportSize.X / 2
+                local startY = cam.ViewportSize.Y
+                local endX = headPos.X
+                local endY = headPos.Y
+                local length = math.sqrt((endX - startX)^2 + (endY - startY)^2)
+                local angle = math.atan2(endY - startY, endX - startX)
+                espObjects[p].line.Position = UDim2.new(0, startX, 0, startY)
+                espObjects[p].line.Size = UDim2.new(0, length, 0, 2)
+                espObjects[p].line.Rotation = math.deg(angle)
+                espObjects[p].line.Visible = true
+            else
+                espObjects[p].line.Visible = false
+            end
+        end
     end)
-    table.insert(espObjects[p], {Disconnect = function() conn:Disconnect() end})
+    espObjects[p].conn = conn
 end
 
 local function removeESP(p)
     if espObjects[p] then
-        for _, o in pairs(espObjects[p]) do
-            if type(o) == "table" and o.Disconnect then o:Disconnect()
-            elseif o and o.Parent then o:Destroy() end
+        if espObjects[p].parts then
+            for _, obj in pairs(espObjects[p].parts) do
+                if obj and obj.Parent then obj:Destroy() end
+            end
         end
+        if espObjects[p].line and espObjects[p].line.Parent then espObjects[p].line:Destroy() end
+        if espObjects[p].conn then espObjects[p].conn:Disconnect() end
         espObjects[p] = nil
     end
 end
@@ -521,93 +651,50 @@ local function updateAllESP()
     end
 end
 
+-- Bật/tắt ESP tổng
 espBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
-    espBtn.Text = espActive and "👁️ ESP: BẬT" or "👁️ ESP: TẮT"
+    espBtn.Text = espActive and "ESP: BAT" or "ESP: TAT"
     espBtn.BackgroundColor3 = espActive and RED or GREEN
     updateAllESP()
 end)
 
-Players.PlayerAdded:Connect(function(p)
-    p.CharacterAdded:Connect(function()
-        task.wait(1)
-        if espActive then createESP(p) end
-    end)
-end)
-Players.PlayerRemoving:Connect(removeESP)
-
--- =====================================================
--- ===== TAB TOOL =====
--- =====================================================
--- NOCLIP
-local noclipBtn = makeBtn(pageTool, "🚪 NOCLIP: TẮT", 8, 32, GREEN, 12)
-local noclipActive, noclipConn = false, nil
-noclipBtn.MouseButton1Click:Connect(function()
-    noclipActive = not noclipActive
-    noclipBtn.Text = noclipActive and "🚪 NOCLIP: BẬT" or "🚪 NOCLIP: TẮT"
-    noclipBtn.BackgroundColor3 = noclipActive and RED or GREEN
-    if noclipActive then
-        noclipConn = RS.Stepped:Connect(function()
-            local c = LP.Character
-            if not c then return end
-            for _, part in pairs(c:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end)
-    else
-        if noclipConn then noclipConn:Disconnect(); noclipConn = nil end
-    end
+-- Nút bật/tắt từng phần
+espBoxBtn.MouseButton1Click:Connect(function()
+    showBox = not showBox
+    espBoxBtn.Text = showBox and "Khung: BAT" or "Khung: TAT"
+    espBoxBtn.BackgroundColor3 = showBox and BLUE or PANEL
+    if espActive then updateAllESP() end
 end)
 
--- FULLBRIGHT
-local fbBtn = makeBtn(pageTool, "💡 FULLBRIGHT: TẮT", 46, 32, GREEN, 12)
-local fbActive = false
-fbBtn.MouseButton1Click:Connect(function()
-    fbActive = not fbActive
-    fbBtn.Text = fbActive and "💡 FULLBRIGHT: BẬT" or "💡 FULLBRIGHT: TẮT"
-    fbBtn.BackgroundColor3 = fbActive and RED or GREEN
-    local L = game:GetService("Lighting")
-    if fbActive then
-        L.Brightness = 3
-        L.ClockTime = 14
-        L.FogEnd = 100000
-        L.Ambient = Color3.fromRGB(200, 200, 200)
-        L.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
-    else
-        L.Brightness = 1
-        L.ClockTime = 14
-        L.FogEnd = 100000
-        L.Ambient = Color3.fromRGB(70, 70, 70)
-        L.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
-    end
+espNameBtn.MouseButton1Click:Connect(function()
+    showName = not showName
+    espNameBtn.Text = showName and "Ten: BAT" or "Ten: TAT"
+    espNameBtn.BackgroundColor3 = showName and BLUE or PANEL
+    if espActive then updateAllESP() end
 end)
 
--- =====================================================
--- ===== XÁC NHẬN MẬT KHẨU =====
--- =====================================================
-cbtn.MouseButton1Click:Connect(function()
-    if pb.Text == "matcuoi290" then
-        pf.Visible = false
-        mf.Visible = true
-        updatePlayerList()
-    else
-        tbx.Text = "Sai mật khẩu!"
-        pb.Text = ""
-    end
-end)
-pb.FocusLost:Connect(function(enter)
-    if enter then cbtn:Activate() end
+espDistBtn.MouseButton1Click:Connect(function()
+    showDist = not showDist
+    espDistBtn.Text = showDist and "Khoang cach: BAT" or "Khoang cach: TAT"
+    espDistBtn.BackgroundColor3 = showDist and BLUE or PANEL
+    if espActive then updateAllESP() end
 end)
 
--- ===== TỰ TẮT KHI HỒI SINH =====
-LP.CharacterAdded:Connect(function()
-    isSpeed, isFly = false, false
-    if speedConn then speedConn:Disconnect(); speedConn = nil end
-    if flyConn then flyConn:Disconnect(); flyConn = nil end
-    if bv then bv:Destroy(); bv = nil end
-    fc.Visible = false
-    speedBtn.Text = "⚡ SPEED: TẮT"
-    speedBtn.BackgroundColor3 = GREEN
-    flyBtn.Text = "🕊️ BAY: TẮT"
-    flyBtn.BackgroundColor3 = BLUE
+espHpBtn.MouseButton1Click:Connect(function()
+    showHp = not showHp
+    espHpBtn.Text = showHp and "Thanh mau: BAT" or "Thanh mau: TAT"
+    espHpBtn.BackgroundColor3 = showHp and BLUE or PANEL
+    if espActive then updateAllESP() end
 end)
+
+espLineBtn.MouseButton1Click:Connect(function()
+    showLine = not showLine
+    espLineBtn.Text = showLine and "Duong chi: BAT" or "Duong chi: TAT"
+    espLineBtn.BackgroundColor3 = showLine and BLUE or PANEL
+    if espActive then updateAllESP() end
+end)
+
+espTeamBtn.MouseButton1Click:Connect(function()
+    showTeam = not showTeam
+    espTeamBtn.Text = showTeam and "Doi mau doi thu: BAT" or "
