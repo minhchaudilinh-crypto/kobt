@@ -1,186 +1,184 @@
--- ===== 1. LẤY DỊCH VỤ =====
+-- ===== DỊCH VỤ =====
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-
+local UIS = game:GetService("UserInputService")
+local RS = game:GetService("RunService")
 local player = Players.LocalPlayer
-local camera = workspace.CurrentCamera
+local cam = workspace.CurrentCamera
 
--- ===== 2. TẠO GUI CHÍNH =====
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MyToolGui"
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.Parent = player:WaitForChild("PlayerGui")
+-- ===== GUI CHÍNH =====
+local sg = Instance.new("ScreenGui")
+sg.Name = "ChauGui"
+sg.ResetOnSpawn = false
+sg.IgnoreGuiInset = true
+sg.Parent = player:WaitForChild("PlayerGui")
+
+-- ===== MẬT KHẨU =====
+local MK = "menu lam boi matcuoi290"
+
+local pf = Instance.new("Frame", sg)
+pf.Size = UDim2.new(0, 260, 0, 150)
+pf.Position = UDim2.new(0.5, -130, 0.5, -75)
+pf.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+pf.Active = true
+pf.Draggable = true
+Instance.new("UICorner", pf).CornerRadius = UDim.new(0, 10)
+
+local pt = Instance.new("TextLabel", pf)
+pt.Size = UDim2.new(1, 0, 0, 35)
+pt.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+pt.Text = "🔒 NHẬP MẬT KHẨU"
+pt.TextColor3 = Color3.fromRGB(255, 255, 255)
+pt.Font = Enum.Font.GothamBold
+pt.TextSize = 15
+Instance.new("UICorner", pt).CornerRadius = UDim.new(0, 10)
+
+local pb = Instance.new("TextBox", pf)
+pb.Size = UDim2.new(0.85, 0, 0, 32)
+pb.Position = UDim2.new(0.075, 0, 0, 45)
+pb.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+pb.PlaceholderText = "Nhập mật khẩu..."
+pb.Text = ""
+pb.TextColor3 = Color3.fromRGB(255, 255, 255)
+pb.Font = Enum.Font.Gotham
+pb.TextSize = 13
+Instance.new("UICorner", pb).CornerRadius = UDim.new(0, 6)
+
+local tb = Instance.new("TextLabel", pf)
+tb.Size = UDim2.new(1, 0, 0, 22)
+tb.Position = UDim2.new(0, 0, 0, 80)
+tb.BackgroundTransparency = 1
+tb.Text = ""
+tb.TextColor3 = Color3.fromRGB(255, 60, 60)
+tb.Font = Enum.Font.GothamBold
+tb.TextSize = 13
+
+local cb = Instance.new("TextButton", pf)
+cb.Size = UDim2.new(0.85, 0, 0, 32)
+cb.Position = UDim2.new(0.075, 0, 0, 105)
+cb.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+cb.Text = "✅ XÁC NHẬN"
+cb.TextColor3 = Color3.fromRGB(255, 255, 255)
+cb.Font = Enum.Font.GothamBold
+cb.TextSize = 14
+Instance.new("UICorner", cb).CornerRadius = UDim.new(0, 6)
+
+-- ===== MENU CHÍNH =====
+local mf = Instance.new("Frame", sg)
+mf.Size = UDim2.new(0, 320, 0, 340)
+mf.Position = UDim2.new(0.5, -160, 0.5, -170)
+mf.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+mf.Active = true
+mf.Draggable = true
+mf.Visible = false
+Instance.new("UICorner", mf).CornerRadius = UDim.new(0, 10)
+
+local mtitle = Instance.new("TextLabel", mf)
+mtitle.Size = UDim2.new(1, -70, 0, 28)
+mtitle.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+mtitle.Text = "⚡ Châu ⚡"
+mtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+mtitle.Font = Enum.Font.GothamBold
+mtitle.TextSize = 14
+Instance.new("UICorner", mtitle).CornerRadius = UDim.new(0, 10)
+
+-- ➖ Thu gọn
+local minBtn = Instance.new("TextButton", mf)
+minBtn.Size = UDim2.new(0, 30, 0, 28)
+minBtn.Position = UDim2.new(1, -65, 0, 0)
+minBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 60)
+minBtn.Text = "➖"
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.Font = Enum.Font.GothamBold
+minBtn.TextSize = 16
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
+
+-- ❌ Tắt
+local closeBtn = Instance.new("TextButton", mf)
+closeBtn.Size = UDim2.new(0, 30, 0, 28)
+closeBtn.Position = UDim2.new(1, -32, 0, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+closeBtn.Text = "❌"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+-- ===== 3 TAB =====
+local function makeTab(text, x)
+    local b = Instance.new("TextButton", mf)
+    b.Size = UDim2.new(0.3, 0, 0, 26)
+    b.Position = UDim2.new(x, 0, 0, 33)
+    b.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
+    b.Text = text
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 11
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    return b
+end
+
+local tabMain = makeTab("🏠 MAIN", 0.02)
+local tabTP = makeTab("📡 TP", 0.35)
+local tabESP = makeTab("👁️ ESP", 0.68)
+
+local function makePage()
+    local p = Instance.new("Frame", mf)
+    p.Size = UDim2.new(1, 0, 1, -65)
+    p.Position = UDim2.new(0, 0, 0, 65)
+    p.BackgroundTransparency = 1
+    p.Visible = false
+    return p
+end
+
+local pageMain = makePage()
+local pageTP = makePage()
+local pageESP = makePage()
+pageMain.Visible = true
+
+local function switchTab(n)
+    pageMain.Visible = (n == 1)
+    pageTP.Visible = (n == 2)
+    pageESP.Visible = (n == 3)
+    tabMain.BackgroundColor3 = (n == 1) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(70, 70, 100)
+    tabTP.BackgroundColor3 = (n == 2) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(70, 70, 100)
+    tabESP.BackgroundColor3 = (n == 3) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(70, 70, 100)
+end
+
+tabMain.MouseButton1Click:Connect(function() switchTab(1) end)
+tabTP.MouseButton1Click:Connect(function() switchTab(2); updatePlayerList() end)
+tabESP.MouseButton1Click:Connect(function() switchTab(3) end)
+
+-- ===== NÚT NHỎ 30x30 =====
+local miniBtn = Instance.new("TextButton", sg)
+miniBtn.Size = UDim2.new(0, 30, 0, 30)
+miniBtn.Position = UDim2.new(0, 20, 0.5, -15)
+miniBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
+miniBtn.Text = "⚡"
+miniBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+miniBtn.Font = Enum.Font.GothamBold
+miniBtn.TextSize = 16
+miniBtn.Visible = false
+miniBtn.Draggable = true
+Instance.new("UICorner", miniBtn).CornerRadius = UDim.new(0, 8)
+
+minBtn.MouseButton1Click:Connect(function()
+    mf.Visible = false
+    miniBtn.Visible = true
+end)
+
+miniBtn.MouseButton1Click:Connect(function()
+    mf.Visible = true
+    miniBtn.Visible = false
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    sg:Destroy()
+end)
 
 -- =====================================================
--- ===== PHẦN A: BẢNG MẬT KHẨU =====
+-- ===== TAB MAIN: SPEED + FLY =====
 -- =====================================================
-local MAT_KHAU_DUNG = "menu lam boi matcuoi290"
-
-local passFrame = Instance.new("Frame")
-passFrame.Size = UDim2.new(0, 260, 0, 180)
-passFrame.Position = UDim2.new(0.5, -130, 0.5, -90)
-passFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-passFrame.BorderSizePixel = 0
-passFrame.Active = true
-passFrame.Draggable = true
-passFrame.Parent = screenGui
-
-local passCorner = Instance.new("UICorner")
-passCorner.CornerRadius = UDim.new(0, 10)
-passCorner.Parent = passFrame
-
-local passTitle = Instance.new("TextLabel")
-passTitle.Size = UDim2.new(1, 0, 0, 40)
-passTitle.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-passTitle.Text = "🔒 NHẬP MẬT KHẨU"
-passTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-passTitle.Font = Enum.Font.GothamBold
-passTitle.TextSize = 16
-passTitle.Parent = passFrame
-
-local passTitleCorner = Instance.new("UICorner")
-passTitleCorner.CornerRadius = UDim.new(0, 10)
-passTitleCorner.Parent = passTitle
-
-local passBox = Instance.new("TextBox")
-passBox.Size = UDim2.new(0.85, 0, 0, 35)
-passBox.Position = UDim2.new(0.075, 0, 0, 55)
-passBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-passBox.Text = ""
-passBox.PlaceholderText = "Nhập mật khẩu..."
-passBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-passBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-passBox.Font = Enum.Font.Gotham
-passBox.TextSize = 13
-passBox.Parent = passFrame
-
-local passBoxCorner = Instance.new("UICorner")
-passBoxCorner.CornerRadius = UDim.new(0, 6)
-passBoxCorner.Parent = passBox
-
-local thongBao = Instance.new("TextLabel")
-thongBao.Size = UDim2.new(1, 0, 0, 25)
-thongBao.Position = UDim2.new(0, 0, 0, 95)
-thongBao.BackgroundTransparency = 1
-thongBao.Text = ""
-thongBao.TextColor3 = Color3.fromRGB(255, 60, 60)
-thongBao.Font = Enum.Font.GothamBold
-thongBao.TextSize = 13
-thongBao.Parent = passFrame
-
-local confirmBtn = Instance.new("TextButton")
-confirmBtn.Size = UDim2.new(0.85, 0, 0, 35)
-confirmBtn.Position = UDim2.new(0.075, 0, 0, 125)
-confirmBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
-confirmBtn.Text = "✅ XÁC NHẬN"
-confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-confirmBtn.Font = Enum.Font.GothamBold
-confirmBtn.TextSize = 14
-confirmBtn.Parent = passFrame
-
-local confirmCorner = Instance.new("UICorner")
-confirmCorner.CornerRadius = UDim.new(0, 6)
-confirmCorner.Parent = confirmBtn
-
--- =====================================================
--- ===== PHẦN B: MENU CHÍNH (ẩn lúc đầu) =====
--- =====================================================
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 320, 0, 380)
-frame.Position = UDim2.new(0.5, -160, 0.5, -190)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-frame.Visible = false
-frame.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 10)
-corner.Parent = frame
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-title.Text = "⚡ TOOL CỦA TÔI ⚡"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.Parent = frame
-
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 10)
-titleCorner.Parent = title
-
--- ===== 4 TAB: MAIN, TP, ESP, GAMEPASS =====
-local tabMainBtn = Instance.new("TextButton")
-tabMainBtn.Size = UDim2.new(0.22, 0, 0, 28)
-tabMainBtn.Position = UDim2.new(0.02, 0, 0, 35)
-tabMainBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
-tabMainBtn.Text = "🏠 MAIN"
-tabMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabMainBtn.Font = Enum.Font.GothamBold
-tabMainBtn.TextSize = 10
-tabMainBtn.Parent = frame
-
-local tabMainCorner = Instance.new("UICorner")
-tabMainCorner.CornerRadius = UDim.new(0, 6)
-tabMainCorner.Parent = tabMainBtn
-
-local tabTPBtn = Instance.new("TextButton")
-tabTPBtn.Size = UDim2.new(0.22, 0, 0, 28)
-tabTPBtn.Position = UDim2.new(0.26, 0, 0, 35)
-tabTPBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
-tabTPBtn.Text = "📡 TP"
-tabTPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabTPBtn.Font = Enum.Font.GothamBold
-tabTPBtn.TextSize = 10
-tabTPBtn.Parent = frame
-
-local tabTPCorner = Instance.new("UICorner")
-tabTPCorner.CornerRadius = UDim.new(0, 6)
-tabTPCorner.Parent = tabTPBtn
-
-local tabESPBtn = Instance.new("TextButton")
-tabESPBtn.Size = UDim2.new(0.22, 0, 0, 28)
-tabESPBtn.Position = UDim2.new(0.50, 0, 0, 35)
-tabESPBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
-tabESPBtn.Text = "👁️ ESP"
-tabESPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabESPBtn.Font = Enum.Font.GothamBold
-tabESPBtn.TextSize = 10
-tabESPBtn.Parent = frame
-
-local tabESPCorner = Instance.new("UICorner")
-tabESPCorner.CornerRadius = UDim.new(0, 6)
-tabESPCorner.Parent = tabESPBtn
-
-local tabGPBtn = Instance.new("TextButton")
-tabGPBtn.Size = UDim2.new(0.22, 0, 0, 28)
-tabGPBtn.Position = UDim2.new(0.74, 0, 0, 35)
-tabGPBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
-tabGPBtn.Text = "🎁 GP"
-tabGPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabGPBtn.Font = Enum.Font.GothamBold
-tabGPBtn.TextSize = 10
-tabGPBtn.Parent = frame
-
-local tabGPCorner = Instance.new("UICorner")
-tabGPCorner.CornerRadius = UDim.new(0, 6)
-tabGPCorner.Parent = tabGPBtn
-
--- ===== TAB MAIN =====
-local mainTab = Instance.new("Frame")
-mainTab.Size = UDim2.new(1, 0, 1, -70)
-mainTab.Position = UDim2.new(0, 0, 0, 68)
-mainTab.BackgroundTransparency = 1
-mainTab.Visible = true
-mainTab.Parent = frame
-
-local speedBtn = Instance.new("TextButton")
+local speedBtn = Instance.new("TextButton", pageMain)
 speedBtn.Size = UDim2.new(0.9, 0, 0, 32)
 speedBtn.Position = UDim2.new(0.05, 0, 0, 5)
 speedBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
@@ -188,193 +186,269 @@ speedBtn.Text = "⚡ SPEED: TẮT"
 speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedBtn.Font = Enum.Font.GothamBold
 speedBtn.TextSize = 13
-speedBtn.Parent = mainTab
+Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 6)
 
-local speedCorner = Instance.new("UICorner")
-speedCorner.CornerRadius = UDim.new(0, 6)
-speedCorner.Parent = speedBtn
-
-local speedBox = Instance.new("TextBox")
-speedBox.Size = UDim2.new(0.9, 0, 0, 26)
+local speedBox = Instance.new("TextBox", pageMain)
+speedBox.Size = UDim2.new(0.9, 0, 0, 28)
 speedBox.Position = UDim2.new(0.05, 0, 0, 40)
 speedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 speedBox.Text = "100"
-speedBox.PlaceholderText = "Tốc độ chạy..."
 speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedBox.Font = Enum.Font.Gotham
 speedBox.TextSize = 12
-speedBox.Parent = mainTab
+Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 6)
 
-local speedBoxCorner = Instance.new("UICorner")
-speedBoxCorner.CornerRadius = UDim.new(0, 6)
-speedBoxCorner.Parent = speedBox
-
-local flyBtn = Instance.new("TextButton")
+local flyBtn = Instance.new("TextButton", pageMain)
 flyBtn.Size = UDim2.new(0.9, 0, 0, 32)
-flyBtn.Position = UDim2.new(0.05, 0, 0, 72)
+flyBtn.Position = UDim2.new(0.05, 0, 0, 75)
 flyBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
 flyBtn.Text = "🕊️ BAY: TẮT"
 flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 flyBtn.Font = Enum.Font.GothamBold
 flyBtn.TextSize = 13
-flyBtn.Parent = mainTab
+Instance.new("UICorner", flyBtn).CornerRadius = UDim.new(0, 6)
 
-local flyCorner = Instance.new("UICorner")
-flyCorner.CornerRadius = UDim.new(0, 6)
-flyCorner.Parent = flyBtn
-
-local flySpeedBox = Instance.new("TextBox")
-flySpeedBox.Size = UDim2.new(0.9, 0, 0, 26)
-flySpeedBox.Position = UDim2.new(0.05, 0, 0, 107)
+local flySpeedBox = Instance.new("TextBox", pageMain)
+flySpeedBox.Size = UDim2.new(0.9, 0, 0, 28)
+flySpeedBox.Position = UDim2.new(0.05, 0, 0, 110)
 flySpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 flySpeedBox.Text = "50"
-flySpeedBox.PlaceholderText = "Tốc độ bay..."
 flySpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 flySpeedBox.Font = Enum.Font.Gotham
 flySpeedBox.TextSize = 12
-flySpeedBox.Parent = mainTab
+Instance.new("UICorner", flySpeedBox).CornerRadius = UDim.new(0, 6)
 
-local flySpeedCorner = Instance.new("UICorner")
-flySpeedCorner.CornerRadius = UDim.new(0, 6)
-flySpeedCorner.Parent = flySpeedBox
+local hint = Instance.new("TextLabel", pageMain)
+hint.Size = UDim2.new(0.9, 0, 0, 80)
+hint.Position = UDim2.new(0.05, 0, 0, 145)
+hint.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+hint.Text = "🎮 BAY:\n• Mobile: 6 nút góc phải\n• PC: W/A/S/D + Space/Shift"
+hint.TextColor3 = Color3.fromRGB(200, 200, 200)
+hint.Font = Enum.Font.Gotham
+hint.TextSize = 11
+hint.TextWrapped = true
+Instance.new("UICorner", hint).CornerRadius = UDim.new(0, 6)
 
-local guide = Instance.new("TextLabel")
-guide.Size = UDim2.new(0.9, 0, 0, 100)
-guide.Position = UDim2.new(0.05, 0, 0, 140)
-guide.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-guide.Text = "🎮 HƯỚNG DẪN BAY:\n• Mobile: Bấm 6 nút ở góc phải\n• PC: Dùng W/A/S/D\n• Space = Lên | Shift = Xuống\n• Bật FLY → 6 nút hiện ra"
-guide.TextColor3 = Color3.fromRGB(200, 200, 200)
-guide.Font = Enum.Font.Gotham
-guide.TextSize = 10
-guide.TextWrapped = true
-guide.Parent = mainTab
+-- ===== NÚT BAY =====
+local fc = Instance.new("Frame", sg)
+fc.Size = UDim2.new(0, 170, 0, 170)
+fc.Position = UDim2.new(1, -180, 1, -180)
+fc.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+fc.BackgroundTransparency = 0.3
+fc.Visible = false
+fc.Active = true
+fc.Draggable = true
+Instance.new("UICorner", fc).CornerRadius = UDim.new(0, 12)
 
-local guideCorner = Instance.new("UICorner")
-guideCorner.CornerRadius = UDim.new(0, 6)
-guideCorner.Parent = guide
+local dirs = {
+    {name="⬆️", x=0.5, y=0.02, dir="up"},
+    {name="⬅️", x=0.05, y=0.35, dir="left"},
+    {name="🔼", x=0.5, y=0.35, dir="forward"},
+    {name="➡️", x=0.95, y=0.35, dir="right"},
+    {name="⬇️", x=0.5, y=0.68, dir="down"},
+    {name="🔽", x=0.5, y=0.95, dir="back"},
+}
+local flyDirs = {forward=false, back=false, left=false, right=false, up=false, down=false}
 
--- ===== TAB TP =====
-local tpTab = Instance.new("Frame")
-tpTab.Size = UDim2.new(1, 0, 1, -70)
-tpTab.Position = UDim2.new(0, 0, 0, 68)
-tpTab.BackgroundTransparency = 1
-tpTab.Visible = false
-tpTab.Parent = frame
+for _, d in ipairs(dirs) do
+    local b = Instance.new("TextButton", fc)
+    b.Size = UDim2.new(0, 45, 0, 45)
+    b.Position = UDim2.new(d.x, -22, d.y, -22)
+    b.BackgroundColor3 = Color3.fromRGB(70, 100, 180)
+    b.Text = d.name
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = 18
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+    b.MouseButton1Down:Connect(function() flyDirs[d.dir] = true end)
+    b.MouseButton1Up:Connect(function() flyDirs[d.dir] = false end)
+    b.MouseLeave:Connect(function() flyDirs[d.dir] = false end)
+end
 
-local tpTitle = Instance.new("TextLabel")
-tpTitle.Size = UDim2.new(0.9, 0, 0, 20)
-tpTitle.Position = UDim2.new(0.05, 0, 0, 5)
-tpTitle.BackgroundTransparency = 1
-tpTitle.Text = "📡 DANH SÁCH NGƯỜI CHƠI:"
-tpTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-tpTitle.Font = Enum.Font.GothamBold
-tpTitle.TextSize = 12
-tpTitle.TextXAlignment = Enum.TextXAlignment.Left
-tpTitle.Parent = tpTab
+-- ===== LOGIC SPEED =====
+local isSpeed, oldSpeed, speedConn = false, 16, nil
 
-local playerList = Instance.new("ScrollingFrame")
+speedBtn.MouseButton1Click:Connect(function()
+    isSpeed = not isSpeed
+    if isSpeed then
+        speedBtn.Text = "⚡ SPEED: BẬT"
+        speedBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if h then oldSpeed = h.WalkSpeed end
+        speedConn = RS.Heartbeat:Connect(function()
+            local c = player.Character
+            if c then
+                local h = c:FindFirstChildOfClass("Humanoid")
+                if h then h.WalkSpeed = tonumber(speedBox.Text) or 100 end
+            end
+        end)
+    else
+        speedBtn.Text = "⚡ SPEED: TẮT"
+        speedBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+        if speedConn then speedConn:Disconnect(); speedConn = nil end
+        local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if h then h.WalkSpeed = oldSpeed end
+    end
+end)
+
+-- ===== LOGIC FLY =====
+local isFly, flyConn, bv = false, nil, nil
+
+flyBtn.MouseButton1Click:Connect(function()
+    isFly = not isFly
+    if isFly then
+        flyBtn.Text = "🕊️ BAY: BẬT"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+        fc.Visible = true
+        local c = player.Character
+        if not c then isFly = false; fc.Visible = false; return end
+        local hrp = c:FindFirstChild("HumanoidRootPart")
+        if not hrp then isFly = false; fc.Visible = false; return end
+        bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+        bv.Velocity = Vector3.new(0, 0, 0)
+        bv.Parent = hrp
+        flyConn = RS.RenderStepped:Connect(function()
+            if not bv or not bv.Parent then return end
+            local sp = tonumber(flySpeedBox.Text) or 50
+            local dir = Vector3.new(0, 0, 0)
+            local look = cam.CFrame.LookVector
+            local right = cam.CFrame.RightVector
+            if flyDirs.forward then dir = dir + look end
+            if flyDirs.back then dir = dir - look end
+            if flyDirs.right then dir = dir + right end
+            if flyDirs.left then dir = dir - right end
+            if flyDirs.up then dir = dir + Vector3.new(0, 1, 0) end
+            if flyDirs.down then dir = dir - Vector3.new(0, 1, 0) end
+            if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + look end
+            if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - look end
+            if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - right end
+            if UIS:IsKeyDown(Enum.KeyCode.D) then dir = dir + right end
+            if UIS:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+            if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+            bv.Velocity = dir.Magnitude > 0 and dir.Unit * sp or Vector3.new(0, 0, 0)
+        end)
+    else
+        flyBtn.Text = "🕊️ BAY: TẮT"
+        flyBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
+        fc.Visible = false
+        if flyConn then flyConn:Disconnect(); flyConn = nil end
+        if bv then bv:Destroy(); bv = nil end
+        for k, _ in pairs(flyDirs) do flyDirs[k] = false end
+    end
+end)
+
+-- =====================================================
+-- ===== TAB TP: DANH SÁCH + CẤP SPEED CHO NGƯỜI KHÁC =====
+-- =====================================================
+local playerList = Instance.new("ScrollingFrame", pageTP)
 playerList.Size = UDim2.new(0.9, 0, 0, 260)
-playerList.Position = UDim2.new(0.05, 0, 0, 30)
+playerList.Position = UDim2.new(0.05, 0, 0, 10)
 playerList.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
 playerList.BorderSizePixel = 0
 playerList.ScrollBarThickness = 6
 playerList.CanvasSize = UDim2.new(0, 0, 0, 0)
 playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-playerList.Parent = tpTab
+Instance.new("UICorner", playerList).CornerRadius = UDim.new(0, 6)
+Instance.new("UIListLayout", playerList).Padding = UDim.new(0, 4)
+local lp = Instance.new("UIPadding", playerList)
+lp.PaddingTop = UDim.new(0, 5)
+lp.PaddingLeft = UDim.new(0, 5)
 
-local listCorner = Instance.new("UICorner")
-listCorner.CornerRadius = UDim.new(0, 6)
-listCorner.Parent = playerList
+local speedOtherConns = {}   -- Lưu connection cấp speed cho người khác
 
-local listLayout = Instance.new("UIListLayout")
-listLayout.Padding = UDim.new(0, 4)
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-listLayout.Parent = playerList
-
-local listPadding = Instance.new("UIPadding")
-listPadding.PaddingTop = UDim.new(0, 5)
-listPadding.PaddingLeft = UDim.new(0, 5)
-listPadding.PaddingRight = UDim.new(0, 5)
-listPadding.Parent = playerList
-
-local function updatePlayerList()
-    for _, child in pairs(playerList:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
+function updatePlayerList()
+    for _, c in pairs(playerList:GetChildren()) do
+        if c:IsA("Frame") then c:Destroy() end
     end
-
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            local row = Instance.new("Frame")
-            row.Size = UDim2.new(1, -10, 0, 30)
+            local row = Instance.new("Frame", playerList)
+            row.Size = UDim2.new(1, -10, 0, 26)
             row.BackgroundColor3 = Color3.fromRGB(70, 70, 100)
             row.BorderSizePixel = 0
-            row.Parent = playerList
+            Instance.new("UICorner", row).CornerRadius = UDim.new(0, 4)
 
-            local rowCorner = Instance.new("UICorner")
-            rowCorner.CornerRadius = UDim.new(0, 4)
-            rowCorner.Parent = row
+            local n = Instance.new("TextLabel", row)
+            n.Size = UDim2.new(0.38, 0, 1, 0)
+            n.Position = UDim2.new(0, 5, 0, 0)
+            n.BackgroundTransparency = 1
+            n.Text = "👤 " .. p.Name
+            n.TextColor3 = Color3.fromRGB(255, 255, 255)
+            n.Font = Enum.Font.Gotham
+            n.TextSize = 10
+            n.TextXAlignment = Enum.TextXAlignment.Left
 
-            local nameLabel = Instance.new("TextLabel")
-            nameLabel.Size = UDim2.new(0.5, 0, 1, 0)
-            nameLabel.Position = UDim2.new(0, 5, 0, 0)
-            nameLabel.BackgroundTransparency = 1
-            nameLabel.Text = "👤 " .. p.Name
-            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            nameLabel.Font = Enum.Font.Gotham
-            nameLabel.TextSize = 11
-            nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-            nameLabel.Parent = row
+            -- Nút ĐẾN
+            local gb = Instance.new("TextButton", row)
+            gb.Size = UDim2.new(0.18, 0, 0, 20)
+            gb.Position = UDim2.new(0.4, 0, 0, 3)
+            gb.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
+            gb.Text = "ĐẾN"
+            gb.TextColor3 = Color3.fromRGB(255, 255, 255)
+            gb.Font = Enum.Font.GothamBold
+            gb.TextSize = 9
+            Instance.new("UICorner", gb).CornerRadius = UDim.new(0, 4)
 
-            local goBtn = Instance.new("TextButton")
-            goBtn.Size = UDim2.new(0.22, 0, 0, 22)
-            goBtn.Position = UDim2.new(0.52, 0, 0, 4)
-            goBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
-            goBtn.Text = "ĐẾN"
-            goBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            goBtn.Font = Enum.Font.GothamBold
-            goBtn.TextSize = 10
-            goBtn.Parent = row
+            -- Nút KÉO
+            local bb = Instance.new("TextButton", row)
+            bb.Size = UDim2.new(0.18, 0, 0, 20)
+            bb.Position = UDim2.new(0.6, 0, 0, 3)
+            bb.BackgroundColor3 = Color3.fromRGB(200, 100, 60)
+            bb.Text = "KÉO"
+            bb.TextColor3 = Color3.fromRGB(255, 255, 255)
+            bb.Font = Enum.Font.GothamBold
+            bb.TextSize = 9
+            Instance.new("UICorner", bb).CornerRadius = UDim.new(0, 4)
 
-            local goCorner = Instance.new("UICorner")
-            goCorner.CornerRadius = UDim.new(0, 4)
-            goCorner.Parent = goBtn
+            -- 🏃 Nút CẤP SPEED
+            local sb = Instance.new("TextButton", row)
+            sb.Size = UDim2.new(0.18, 0, 0, 20)
+            sb.Position = UDim2.new(0.8, 0, 0, 3)
+            sb.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+            sb.Text = "🏃"
+            sb.TextColor3 = Color3.fromRGB(255, 255, 255)
+            sb.Font = Enum.Font.GothamBold
+            sb.TextSize = 11
+            Instance.new("UICorner", sb).CornerRadius = UDim.new(0, 4)
 
-            local bringBtn = Instance.new("TextButton")
-            bringBtn.Size = UDim2.new(0.22, 0, 0, 22)
-            bringBtn.Position = UDim2.new(0.76, 0, 0, 4)
-            bringBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 60)
-            bringBtn.Text = "KÉO"
-            bringBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            bringBtn.Font = Enum.Font.GothamBold
-            bringBtn.TextSize = 10
-            bringBtn.Parent = row
-
-            local bringCorner = Instance.new("UICorner")
-            bringCorner.CornerRadius = UDim.new(0, 4)
-            bringCorner.Parent = bringBtn
-
-            goBtn.MouseButton1Click:Connect(function()
-                local myChar = player.Character
-                if not myChar then return end
-                local myHrp = myChar:FindFirstChild("HumanoidRootPart")
-                if not myHrp then return end
-                local tChar = p.Character
-                if not tChar then return end
-                local tHrp = tChar:FindFirstChild("HumanoidRootPart")
-                if not tHrp then return end
-                myHrp.CFrame = tHrp.CFrame + Vector3.new(0, 0, 3)
+            gb.MouseButton1Click:Connect(function()
+                local mc, tc = player.Character, p.Character
+                if mc and tc then
+                    local mh = mc:FindFirstChild("HumanoidRootPart")
+                    local th = tc:FindFirstChild("HumanoidRootPart")
+                    if mh and th then mh.CFrame = th.CFrame + Vector3.new(0, 0, 3) end
+                end
             end)
 
-            bringBtn.MouseButton1Click:Connect(function()
-                local myChar = player.Character
-                if not myChar then return end
-                local myHrp = myChar:FindFirstChild("HumanoidRootPart")
-                if not myHrp then return end
-                local tChar = p.Character
-                if not tChar then return end
-                local tHrp = tChar:FindFirstChild("HumanoidRootPart")
-                if not tHrp then return end
-                tHrp.CFrame = myHrp.CFrame + Vector3.new(0, 0, 3)
+            bb.MouseButton1Click:Connect(function()
+                local mc, tc = player.Character, p.Character
+                if mc and tc then
+                    local mh = mc:FindFirstChild("HumanoidRootPart")
+                    local th = tc:FindFirstChild("HumanoidRootPart")
+                    if mh and th then th.CFrame = mh.CFrame + Vector3.new(0, 0, 3) end
+                end
+            end)
+
+            -- 🏃 Cấp speed — bật/tắt
+            sb.MouseButton1Click:Connect(function()
+                if speedOtherConns[p] then
+                    -- Đang bật → tắt
+                    speedOtherConns[p]:Disconnect()
+                    speedOtherConns[p] = nil
+                    sb.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+                    sb.Text = "🏃"
+                else
+                    -- Đang tắt → bật
+                    sb.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+                    sb.Text = "✋"
+                    speedOtherConns[p] = RS.Heartbeat:Connect(function()
+                        local c = p.Character
+                        if not c then return end
+                        local h = c:FindFirstChildOfClass("Humanoid")
+                        if h then h.WalkSpeed = 200 end
+                    end)
+                end
             end)
         end
     end
@@ -382,283 +456,132 @@ end
 
 updatePlayerList()
 Players.PlayerAdded:Connect(function() task.wait(1) updatePlayerList() end)
-Players.PlayerRemoving:Connect(updatePlayerList)
+Players.PlayerRemoving:Connect(function(p)
+    if speedOtherConns[p] then speedOtherConns[p]:Disconnect(); speedOtherConns[p] = nil end
+    updatePlayerList()
+end)
 
 -- =====================================================
--- ===== TAB ESP (NHÌN THẤY NGƯỜI CHƠI KHÁC) =====
+-- ===== TAB ESP =====
 -- =====================================================
-local espTab = Instance.new("Frame")
-espTab.Size = UDim2.new(1, 0, 1, -70)
-espTab.Position = UDim2.new(0, 0, 0, 68)
-espTab.BackgroundTransparency = 1
-espTab.Visible = false
-espTab.Parent = frame
-
-local espBtn = Instance.new("TextButton")
-espBtn.Size = UDim2.new(0.9, 0, 0, 32)
-espBtn.Position = UDim2.new(0.05, 0, 0, 5)
+local espBtn = Instance.new("TextButton", pageESP)
+espBtn.Size = UDim2.new(0.9, 0, 0, 35)
+espBtn.Position = UDim2.new(0.05, 0, 0, 10)
 espBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
 espBtn.Text = "👁️ ESP: TẮT"
 espBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 espBtn.Font = Enum.Font.GothamBold
 espBtn.TextSize = 13
-espBtn.Parent = espTab
+Instance.new("UICorner", espBtn).CornerRadius = UDim.new(0, 6)
 
-local espCorner = Instance.new("UICorner")
-espCorner.CornerRadius = UDim.new(0, 6)
-espCorner.Parent = espBtn
+local espActive, espObjects = false, {}
 
--- Nút bật/tắt khoảng cách
-local distBtn = Instance.new("TextButton")
-distBtn.Size = UDim2.new(0.9, 0, 0, 28)
-distBtn.Position = UDim2.new(0.05, 0, 0, 42)
-distBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
-distBtn.Text = "📏 KHOẢNG CÁCH: BẬT"
-distBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-distBtn.Font = Enum.Font.GothamBold
-distBtn.TextSize = 12
-distBtn.Parent = espTab
-
-local distCorner = Instance.new("UICorner")
-distCorner.CornerRadius = UDim.new(0, 6)
-distCorner.Parent = distBtn
-
--- Nút bật/tắt tên
-local nameBtn = Instance.new("TextButton")
-nameBtn.Size = UDim2.new(0.9, 0, 0, 28)
-nameBtn.Position = UDim2.new(0.05, 0, 0, 75)
-nameBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
-nameBtn.Text = "📛 TÊN: BẬT"
-nameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameBtn.Font = Enum.Font.GothamBold
-nameBtn.TextSize = 12
-nameBtn.Parent = espTab
-
-local nameCorner = Instance.new("UICorner")
-nameCorner.CornerRadius = UDim.new(0, 6)
-nameCorner.Parent = nameBtn
-
--- Nút bật/tắt khung
-local boxBtn = Instance.new("TextButton")
-boxBtn.Size = UDim2.new(0.9, 0, 0, 28)
-boxBtn.Position = UDim2.new(0.05, 0, 0, 108)
-boxBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
-boxBtn.Text = "⬜ KHUNG: BẬT"
-boxBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-boxBtn.Font = Enum.Font.GothamBold
-boxBtn.TextSize = 12
-boxBtn.Parent = espTab
-
-local boxCorner = Instance.new("UICorner")
-boxCorner.CornerRadius = UDim.new(0, 6)
-boxCorner.Parent = boxBtn
-
--- Nút bật/tắt đường chỉ
-local lineBtn = Instance.new("TextButton")
-lineBtn.Size = UDim2.new(0.9, 0, 0, 28)
-lineBtn.Position = UDim2.new(0.05, 0, 0, 141)
-lineBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
-lineBtn.Text = "📏 ĐƯỜNG CHỈ: BẬT"
-lineBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-lineBtn.Font = Enum.Font.GothamBold
-lineBtn.TextSize = 12
-lineBtn.Parent = espTab
-
-local lineCorner = Instance.new("UICorner")
-lineCorner.CornerRadius = UDim.new(0, 6)
-lineCorner.Parent = lineBtn
-
--- Hướng dẫn
-local espGuide = Instance.new("TextLabel")
-espGuide.Size = UDim2.new(0.9, 0, 0, 80)
-espGuide.Position = UDim2.new(0.05, 0, 0, 175)
-espGuide.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-espGuide.Text = "👁️ ESP giúp bạn thấy người chơi\nkhác xuyên tường.\nBật ESP → tự động hiện tất cả."
-espGuide.TextColor3 = Color3.fromRGB(200, 200, 200)
-espGuide.Font = Enum.Font.Gotham
-espGuide.TextSize = 10
-espGuide.TextWrapped = true
-espGuide.Parent = espTab
-
-local espGuideCorner = Instance.new("UICorner")
-espGuideCorner.CornerRadius = UDim.new(0, 6)
-espGuideCorner.Parent = espGuide
-
--- ===== LOGIC ESP =====
-local espActive = false
-local showDistance = true
-local showName = true
-local showBox = true
-local showLine = true
-local espObjects = {}   -- Lưu các object ESP để xoá sau
-
--- Hàm tạo ESP cho 1 người chơi
-local function createESP(targetPlayer)
-    -- Xoá ESP cũ nếu có
-    if espObjects[targetPlayer] then
-        for _, obj in pairs(espObjects[targetPlayer]) do
-            if obj and obj.Parent then obj:Destroy() end
-        end
-    end
-
-    espObjects[targetPlayer] = {}
-
-    -- Highlight (làm sáng nhân vật)
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP_Highlight"
-    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = targetPlayer.Character
-    table.insert(espObjects[targetPlayer], highlight)
-
-    -- BillboardGui hiện tên + khoảng cách
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESP_Billboard"
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = targetPlayer.Character:FindFirstChild("Head") or targetPlayer.Character
-
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Name = "ESP_Name"
-    nameLabel.Size = UDim2.new(1, 0, 0, 20)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.Text = targetPlayer.Name
-    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    nameLabel.TextStrokeTransparency = 0
-    nameLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.TextSize = 14
-    nameLabel.Parent = billboard
-    table.insert(espObjects[targetPlayer], billboard)
-
-    local distLabel = Instance.new("TextLabel")
-    distLabel.Name = "ESP_Distance"
-    distLabel.Size = UDim2.new(1, 0, 0, 18)
-    distLabel.Position = UDim2.new(0, 0, 0, 22)
-    distLabel.BackgroundTransparency = 1
-    distLabel.Text = "0 studs"
-    distLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
-    distLabel.TextStrokeTransparency = 0
-    distLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    distLabel.Font = Enum.Font.GothamBold
-    distLabel.TextSize = 12
-    distLabel.Parent = billboard
-
-    -- Cập nhật khoảng cách liên tục
-    local distConn = RunService.RenderStepped:Connect(function()
-        if not espActive or not targetPlayer.Character then return end
-        if not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
-        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-
-        local myPos = player.Character.HumanoidRootPart.Position
-        local theirPos = targetPlayer.Character.HumanoidRootPart.Position
-        local dist = math.floor((myPos - theirPos).Magnitude)
-        distLabel.Text = dist .. " studs"
+local function createESP(p)
+    if not p.Character then return end
+    espObjects[p] = {}
+    local hl = Instance.new("Highlight")
+    hl.FillColor = Color3.fromRGB(255, 0, 0)
+    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+    hl.FillTransparency = 0.5
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.Parent = p.Character
+    table.insert(espObjects[p], hl)
+    local bb = Instance.new("BillboardGui")
+    bb.Size = UDim2.new(0, 150, 0, 40)
+    bb.StudsOffset = Vector3.new(0, 3, 0)
+    bb.AlwaysOnTop = true
+    bb.Parent = p.Character:FindFirstChild("Head") or p.Character
+    local nm = Instance.new("TextLabel", bb)
+    nm.Size = UDim2.new(1, 0, 0, 20)
+    nm.BackgroundTransparency = 1
+    nm.Text = p.Name
+    nm.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nm.TextStrokeTransparency = 0
+    nm.Font = Enum.Font.GothamBold
+    nm.TextSize = 13
+    local dl = Instance.new("TextLabel", bb)
+    dl.Size = UDim2.new(1, 0, 0, 18)
+    dl.Position = UDim2.new(0, 0, 0, 20)
+    dl.BackgroundTransparency = 1
+    dl.Text = "..."
+    dl.TextColor3 = Color3.fromRGB(255, 255, 100)
+    dl.TextStrokeTransparency = 0
+    dl.Font = Enum.Font.GothamBold
+    dl.TextSize = 11
+    table.insert(espObjects[p], bb)
+    local conn = RS.RenderStepped:Connect(function()
+        if not espActive then return end
+        if not p.Character or not player.Character then return end
+        local a = p.Character:FindFirstChild("HumanoidRootPart")
+        local b = player.Character:FindFirstChild("HumanoidRootPart")
+        if a and b then dl.Text = math.floor((a.Position - b.Position).Magnitude) .. " studs" end
     end)
-    table.insert(espObjects[targetPlayer], {Destroy = function() distConn:Disconnect() end})
+    table.insert(espObjects[p], {Disconnect = function() conn:Disconnect() end})
 end
 
--- Hàm xoá ESP
-local function removeESP(targetPlayer)
-    if espObjects[targetPlayer] then
-        for _, obj in pairs(espObjects[targetPlayer]) do
-            if typeof(obj) == "table" and obj.Destroy then
-                obj.Destroy()
-            elseif obj and obj.Parent then
-                obj:Destroy()
-            end
+local function removeESP(p)
+    if espObjects[p] then
+        for _, o in pairs(espObjects[p]) do
+            if type(o) == "table" and o.Disconnect then o:Disconnect()
+            elseif o and o.Parent then o:Destroy() end
         end
-        espObjects[targetPlayer] = nil
+        espObjects[p] = nil
     end
 end
 
--- Hàm bật/tắt ESP
-local function updateESP()
+local function updateAllESP()
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            if espActive then
-                createESP(p)
-            else
-                removeESP(p)
-            end
+        if p ~= player then
+            if espActive then createESP(p) else removeESP(p) end
         end
     end
 end
 
--- Bật/tắt ESP
 espBtn.MouseButton1Click:Connect(function()
     espActive = not espActive
-    if espActive then
-        espBtn.Text = "👁️ ESP: BẬT"
-        espBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-        updateESP()
-    else
-        espBtn.Text = "👁️ ESP: TẮT"
-        espBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
-        updateESP()
-    end
+    espBtn.Text = espActive and "👁️ ESP: BẬT" or "👁️ ESP: TẮT"
+    espBtn.BackgroundColor3 = espActive and Color3.fromRGB(200, 60, 60) or Color3.fromRGB(60, 200, 100)
+    updateAllESP()
 end)
 
--- Bật/tắt khoảng cách
-distBtn.MouseButton1Click:Connect(function()
-    showDistance = not showDistance
-    distBtn.Text = showDistance and "📏 KHOẢNG CÁCH: BẬT" or "📏 KHOẢNG CÁCH: TẮT"
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            local bb = p.Character:FindFirstChild("ESP_Billboard", true)
-            if bb then
-                local d = bb:FindFirstChild("ESP_Distance")
-                if d then d.Visible = showDistance end
-            end
-        end
-    end
-end)
-
--- Bật/tắt tên
-nameBtn.MouseButton1Click:Connect(function()
-    showName = not showName
-    nameBtn.Text = showName and "📛 TÊN: BẬT" or "📛 TÊN: TẮT"
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            local bb = p.Character:FindFirstChild("ESP_Billboard", true)
-            if bb then
-                local n = bb:FindFirstChild("ESP_Name")
-                if n then n.Visible = showName end
-            end
-        end
-    end
-end)
-
--- Bật/tắt khung
-boxBtn.MouseButton1Click:Connect(function()
-    showBox = not showBox
-    boxBtn.Text = showBox and "⬜ KHUNG: BẬT" or "⬜ KHUNG: TẮT"
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player and p.Character then
-            local h = p.Character:FindFirstChild("ESP_Highlight", true)
-            if h then h.Enabled = showBox end
-        end
-    end
-end)
-
--- Bật/tắt đường chỉ (bỏ qua vì đơn giản)
-lineBtn.MouseButton1Click:Connect(function()
-    showLine = not showLine
-    lineBtn.Text = showLine and "📏 ĐƯỜNG CHỈ: BẬT" or "📏 ĐƯỜNG CHỈ: TẮT"
-end)
-
--- Tự động cập nhật ESP khi có người vào/ra
 Players.PlayerAdded:Connect(function(p)
     p.CharacterAdded:Connect(function()
         task.wait(1)
         if espActive then createESP(p) end
     end)
 end)
+Players.PlayerRemoving:Connect(removeESP)
 
+-- =====================================================
+-- ===== XÁC NHẬN MẬT KHẨU =====
+-- =====================================================
+cb.MouseButton1Click:Connect(function()
+    if pb.Text == MK then
+        pf.Visible = false
+        mf.Visible = true
+        updatePlayerList()
+    else
+        tb.Text = "a con chó"
+        pb.Text = ""
+    end
+end)
+
+pb.FocusLost:Connect(function(enter)
+    if enter then cb:Activate() end
+end)
+
+-- ===== TỰ TẮT KHI HỒI SINH =====
+player.CharacterAdded:Connect(function()
+    isSpeed, isFly = false, false
+    if speedConn then speedConn:Disconnect(); speedConn = nil end
+    if flyConn then flyConn:Disconnect(); flyConn = nil end
+    if bv then bv:Destroy(); bv = nil end
+    fc.Visible = false
+    speedBtn.Text = "⚡ SPEED: TẮT"
+    speedBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+    flyBtn.Text = "🕊️ BAY: TẮT"
+    flyBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
+end)
 Players.PlayerRemoving:Connect(function(p)
     removeESP(p)
 end)
