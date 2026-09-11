@@ -1,242 +1,153 @@
--- ===== DỊCH VỤ =====
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("RunService")
-local player = Players.LocalPlayer
+local LP = Players.LocalPlayer
 local cam = workspace.CurrentCamera
 
--- ===== GUI =====
 local sg = Instance.new("ScreenGui")
 sg.Name = "ChauGui"
 sg.ResetOnSpawn = false
 sg.IgnoreGuiInset = true
-sg.Parent = player:WaitForChild("PlayerGui")
+sg.Parent = LP:WaitForChild("PlayerGui")
+
+-- Helper tạo nút
+local function btn(parent, txt, x, y, w, h, color, size)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(w or 0.9, 0, 0, h or 30)
+    b.Position = UDim2.new(x or 0.05, 0, 0, y)
+    b.BackgroundColor3 = color or Color3.fromRGB(60, 120, 200)
+    b.Text = txt
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.GothamBold
+    b.TextSize = size or 12
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    return b
+end
 
 -- ===== MẬT KHẨU =====
-local MK = "menu lam boi matcuoi290"
-
 local pf = Instance.new("Frame", sg)
-pf.Size = UDim2.new(0, 260, 0, 150)
-pf.Position = UDim2.new(0.5, -130, 0.5, -75)
+pf.Size = UDim2.new(0, 260, 0, 140)
+pf.Position = UDim2.new(0.5, -130, 0.5, -70)
 pf.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 pf.Active = true
 pf.Draggable = true
-Instance.new("UICorner", pf).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", pf).CornerRadius = UDim.new(0, 10)
 
 local pt = Instance.new("TextLabel", pf)
-pt.Size = UDim2.new(1, 0, 0, 35)
+pt.Size = UDim2.new(1, 0, 0, 30)
+pt.Position = UDim2.new(0, 0, 0, 5)
 pt.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 pt.Text = "🔒 MẬT KHẨU"
 pt.TextColor3 = Color3.fromRGB(255, 255, 255)
 pt.Font = Enum.Font.GothamBold
-pt.TextSize = 15
-Instance.new("UICorner", pt).CornerRadius = UDim.new(0, 12)
+pt.TextSize = 14
+Instance.new("UICorner", pt).CornerRadius = UDim.new(0, 10)
 
 local pb = Instance.new("TextBox", pf)
-pb.Size = UDim2.new(0.85, 0, 0, 32)
-pb.Position = UDim2.new(0.075, 0, 0, 45)
+pb.Size = UDim2.new(0.85, 0, 0, 30)
+pb.Position = UDim2.new(0.075, 0, 0, 42)
 pb.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 pb.PlaceholderText = "Nhập mật khẩu..."
 pb.Text = ""
 pb.TextColor3 = Color3.fromRGB(255, 255, 255)
 pb.Font = Enum.Font.Gotham
-pb.TextSize = 13
-Instance.new("UICorner", pb).CornerRadius = UDim.new(0, 8)
+pb.TextSize = 12
+Instance.new("UICorner", pb).CornerRadius = UDim.new(0, 6)
 
-local tb = Instance.new("TextLabel", pf)
-tb.Size = UDim2.new(1, 0, 0, 22)
-tb.Position = UDim2.new(0, 0, 0, 80)
-tb.BackgroundTransparency = 1
-tb.Text = ""
-tb.TextColor3 = Color3.fromRGB(255, 60, 60)
-tb.Font = Enum.Font.GothamBold
-tb.TextSize = 13
+local tbx = Instance.new("TextLabel", pf)
+tbx.Size = UDim2.new(1, 0, 0, 20)
+tbx.Position = UDim2.new(0, 0, 0, 75)
+tbx.BackgroundTransparency = 1
+tbx.Text = ""
+tbx.TextColor3 = Color3.fromRGB(255, 60, 60)
+tbx.Font = Enum.Font.GothamBold
+tbx.TextSize = 12
 
-local cb = Instance.new("TextButton", pf)
-cb.Size = UDim2.new(0.85, 0, 0, 32)
-cb.Position = UDim2.new(0.075, 0, 0, 105)
-cb.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
-cb.Text = "✅ XÁC NHẬN"
-cb.TextColor3 = Color3.fromRGB(255, 255, 255)
-cb.Font = Enum.Font.GothamBold
-cb.TextSize = 14
-Instance.new("UICorner", cb).CornerRadius = UDim.new(0, 8)
+local cbtn = btn(pf, "✅ XÁC NHẬN", 0.075, 98, 0.85, 30, Color3.fromRGB(60, 200, 100))
 
 -- ===== MENU CHÍNH =====
 local mf = Instance.new("Frame", sg)
-mf.Size = UDim2.new(0, 320, 0, 340)
-mf.Position = UDim2.new(0.5, -160, 0.5, -170)
+mf.Size = UDim2.new(0, 340, 0, 340)
+mf.Position = UDim2.new(0.5, -170, 0.5, -170)
 mf.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 mf.Active = true
 mf.Draggable = true
 mf.Visible = false
-Instance.new("UICorner", mf).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", mf).CornerRadius = UDim.new(0, 10)
 
-local mStroke = Instance.new("UIStroke", mf)
-mStroke.Color = Color3.fromRGB(100, 150, 255)
-mStroke.Thickness = 1.5
+local title = Instance.new("TextLabel", mf)
+title.Size = UDim2.new(1, -70, 0, 28)
+title.BackgroundColor3 = Color3.fromRGB(50, 80, 150)
+title.Text = "⚡ CHÂU ⚡"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
 
--- Tiêu đề đẹp với gradient
-local mtitle = Instance.new("TextLabel", mf)
-mtitle.Size = UDim2.new(1, -70, 0, 32)
-mtitle.BackgroundColor3 = Color3.fromRGB(50, 80, 150)
-mtitle.Text = "⚡ CHÂU ⚡"
-mtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-mtitle.Font = Enum.Font.GothamBold
-mtitle.TextSize = 15
-Instance.new("UICorner", mtitle).CornerRadius = UDim.new(0, 12)
+local minB = btn(mf, "➖", 0, 0, 0, 0, Color3.fromRGB(200, 150, 60), 16)
+minB.Size = UDim2.new(0, 30, 0, 28)
+minB.Position = UDim2.new(1, -65, 0, 0)
 
-local titleGrad = Instance.new("UIGradient", mtitle)
-titleGrad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 150, 220)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 80, 200))
-}
-titleGrad.Rotation = 45
+local closeB = btn(mf, "❌", 0, 0, 0, 0, Color3.fromRGB(200, 60, 60), 14)
+closeB.Size = UDim2.new(0, 30, 0, 28)
+closeB.Position = UDim2.new(1, -32, 0, 0)
 
--- ➖ Thu gọn
-local minBtn = Instance.new("TextButton", mf)
-minBtn.Size = UDim2.new(0, 30, 0, 28)
-minBtn.Position = UDim2.new(1, -65, 0, 2)
-minBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 60)
-minBtn.Text = "➖"
-minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-minBtn.Font = Enum.Font.GothamBold
-minBtn.TextSize = 16
-Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 8)
-
--- ❌ Tắt
-local closeBtn = Instance.new("TextButton", mf)
-closeBtn.Size = UDim2.new(0, 30, 0, 28)
-closeBtn.Position = UDim2.new(1, -32, 0, 2)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-closeBtn.Text = "❌"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
-
--- ===== 3 TAB =====
-local function makeTab(text, x)
-    local b = Instance.new("TextButton", mf)
-    b.Size = UDim2.new(0.3, 0, 0, 26)
-    b.Position = UDim2.new(x, 0, 0, 38)
-    b.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-    b.Text = text
-    b.TextColor3 = Color3.fromRGB(255, 255, 255)
-    b.Font = Enum.Font.GothamBold
-    b.TextSize = 11
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
-    return b
-end
-
-local tabMain = makeTab("🏠 MAIN", 0.02)
-local tabTP = makeTab("📡 TP", 0.35)
-local tabESP = makeTab("👁️ ESP", 0.68)
-
-local function makePage()
+-- ===== 4 TABS =====
+local tabNames = {"🏠 MAIN", "📡 TP", "👁️ ESP", "🛠️ TOOL"}
+local tabs, pages = {}, {}
+for i, name in ipairs(tabNames) do
+    local x = 0.02 + (i-1) * 0.245
+    local t = btn(mf, name, x, 33, 0.23, 26, Color3.fromRGB(45, 45, 65), 10)
+    tabs[i] = t
     local p = Instance.new("Frame", mf)
-    p.Size = UDim2.new(1, 0, 1, -70)
-    p.Position = UDim2.new(0, 0, 0, 70)
+    p.Size = UDim2.new(1, 0, 1, -65)
+    p.Position = UDim2.new(0, 0, 0, 65)
     p.BackgroundTransparency = 1
-    p.Visible = false
-    return p
+    p.Visible = (i == 1)
+    pages[i] = p
+    t.MouseButton1Click:Connect(function()
+        for j = 1, #tabs do
+            pages[j].Visible = (j == i)
+            tabs[j].BackgroundColor3 = (j == i) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(45, 45, 65)
+        end
+        if i == 2 then updatePlayerList() end
+    end)
 end
+tabs[1].BackgroundColor3 = Color3.fromRGB(60, 200, 100)
+local pageMain, pageTP, pageESP, pageTool = pages[1], pages[2], pages[3], pages[4]
 
-local pageMain = makePage()
-local pageTP = makePage()
-local pageESP = makePage()
-pageMain.Visible = true
+-- ===== NÚT THU NHỎ =====
+local mini = btn(sg, "⚡", 0, 0, 0, 0, Color3.fromRGB(80, 120, 220), 24)
+mini.Size = UDim2.new(0, 55, 0, 55)
+mini.Position = UDim2.new(0, 20, 0.5, -27)
+mini.Visible = false
+Instance.new("UICorner", mini).CornerRadius = UDim.new(1, 0)
 
-local function switchTab(n)
-    pageMain.Visible = (n == 1)
-    pageTP.Visible = (n == 2)
-    pageESP.Visible = (n == 3)
-    tabMain.BackgroundColor3 = (n == 1) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(45, 45, 65)
-    tabTP.BackgroundColor3 = (n == 2) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(45, 45, 65)
-    tabESP.BackgroundColor3 = (n == 3) and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(45, 45, 65)
-end
-
-tabMain.MouseButton1Click:Connect(function() switchTab(1) end)
-tabTP.MouseButton1Click:Connect(function() switchTab(2); updatePlayerList() end)
-tabESP.MouseButton1Click:Connect(function() switchTab(3) end)
-
--- ===== NÚT THU NHỎ ĐẸP =====
-local miniBtn = Instance.new("TextButton", sg)
-miniBtn.Size = UDim2.new(0, 55, 0, 55)
-miniBtn.Position = UDim2.new(0, 20, 0.5, -27)
-miniBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 220)
-miniBtn.Text = "⚡"
-miniBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-miniBtn.Font = Enum.Font.GothamBold
-miniBtn.TextSize = 24
-miniBtn.Visible = false
-miniBtn.Active = true
-miniBtn.Draggable = true
-Instance.new("UICorner", miniBtn).CornerRadius = UDim.new(1, 0)
-
-local miniGrad = Instance.new("UIGradient", miniBtn)
-miniGrad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 160, 240)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 80, 220))
-}
-miniGrad.Rotation = 45
-
-local miniStroke = Instance.new("UIStroke", miniBtn)
-miniStroke.Color = Color3.fromRGB(200, 220, 255)
-miniStroke.Thickness = 1.5
-
-miniBtn.MouseEnter:Connect(function()
-    miniBtn:TweenSize(UDim2.new(0, 60, 0, 60), "Out", "Quad", 0.15)
-end)
-miniBtn.MouseLeave:Connect(function()
-    miniBtn:TweenSize(UDim2.new(0, 55, 0, 55), "Out", "Quad", 0.15)
-end)
-
-minBtn.MouseButton1Click:Connect(function()
+minB.MouseButton1Click:Connect(function()
     mf.Visible = false
-    miniBtn.Visible = true
+    mini.Visible = true
 end)
-
-miniBtn.MouseButton1Click:Connect(function()
+mini.MouseButton1Click:Connect(function()
     mf.Visible = true
-    miniBtn.Visible = false
+    mini.Visible = false
 end)
-
-closeBtn.MouseButton1Click:Connect(function() sg:Destroy() end)
+closeB.MouseButton1Click:Connect(function() sg:Destroy() end)
 
 -- =====================================================
 -- ===== TAB MAIN =====
 -- =====================================================
-local speedBtn = Instance.new("TextButton", pageMain)
-speedBtn.Size = UDim2.new(0.9, 0, 0, 32)
-speedBtn.Position = UDim2.new(0.05, 0, 0, 10)
-speedBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
-speedBtn.Text = "⚡ SPEED: TẮT"
-speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedBtn.Font = Enum.Font.GothamBold
-speedBtn.TextSize = 13
-Instance.new("UICorner", speedBtn).CornerRadius = UDim.new(0, 8)
-
+local speedBtn = btn(pageMain, "⚡ SPEED: TẮT", 0.05, 5, 0.9, 32, Color3.fromRGB(60, 200, 100), 13)
 local speedBox = Instance.new("TextBox", pageMain)
 speedBox.Size = UDim2.new(0.9, 0, 0, 28)
-speedBox.Position = UDim2.new(0.05, 0, 0, 45)
+speedBox.Position = UDim2.new(0.05, 0, 0, 42)
 speedBox.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
 speedBox.Text = "100"
 speedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 speedBox.Font = Enum.Font.Gotham
 speedBox.TextSize = 12
-Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0, 6)
 
-local flyBtn = Instance.new("TextButton", pageMain)
-flyBtn.Size = UDim2.new(0.9, 0, 0, 32)
-flyBtn.Position = UDim2.new(0.05, 0, 0, 80)
-flyBtn.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
-flyBtn.Text = "🕊️ BAY: TẮT"
-flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyBtn.Font = Enum.Font.GothamBold
-flyBtn.TextSize = 13
-Instance.new("UICorner", flyBtn).CornerRadius = UDim.new(0, 8)
-
+local flyBtn = btn(pageMain, "🕊️ BAY: TẮT", 0.05, 78, 0.9, 32, Color3.fromRGB(60, 120, 200), 13)
 local flySpeedBox = Instance.new("TextBox", pageMain)
 flySpeedBox.Size = UDim2.new(0.9, 0, 0, 28)
 flySpeedBox.Position = UDim2.new(0.05, 0, 0, 115)
@@ -245,7 +156,7 @@ flySpeedBox.Text = "50"
 flySpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 flySpeedBox.Font = Enum.Font.Gotham
 flySpeedBox.TextSize = 12
-Instance.new("UICorner", flySpeedBox).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", flySpeedBox).CornerRadius = UDim.new(0, 6)
 
 local hint = Instance.new("TextLabel", pageMain)
 hint.Size = UDim2.new(0.9, 0, 0, 80)
@@ -256,9 +167,9 @@ hint.TextColor3 = Color3.fromRGB(200, 200, 200)
 hint.Font = Enum.Font.Gotham
 hint.TextSize = 11
 hint.TextWrapped = true
-Instance.new("UICorner", hint).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", hint).CornerRadius = UDim.new(0, 6)
 
--- Nút bay ngoài màn hình
+-- Nút bay ngoài
 local fc = Instance.new("Frame", sg)
 fc.Size = UDim2.new(0, 170, 0, 170)
 fc.Position = UDim2.new(1, -180, 1, -180)
@@ -270,42 +181,40 @@ fc.Draggable = true
 Instance.new("UICorner", fc).CornerRadius = UDim.new(0, 12)
 
 local dirs = {
-    {name="⬆️", x=0.5, y=0.02, dir="up"},
-    {name="⬅️", x=0.05, y=0.35, dir="left"},
-    {name="🔼", x=0.5, y=0.35, dir="forward"},
-    {name="➡️", x=0.95, y=0.35, dir="right"},
-    {name="⬇️", x=0.5, y=0.68, dir="down"},
-    {name="🔽", x=0.5, y=0.95, dir="back"},
+    {n="⬆️", x=0.5, y=0.02, d="up"},
+    {n="⬅️", x=0.05, y=0.35, d="left"},
+    {n="🔼", x=0.5, y=0.35, d="forward"},
+    {n="➡️", x=0.95, y=0.35, d="right"},
+    {n="⬇️", x=0.5, y=0.68, d="down"},
+    {n="🔽", x=0.5, y=0.95, d="back"},
 }
-local flyDirs = {forward=false, back=false, left=false, right=false, up=false, down=false}
-
+local fDirs = {forward=false, back=false, left=false, right=false, up=false, down=false}
 for _, d in ipairs(dirs) do
     local b = Instance.new("TextButton", fc)
     b.Size = UDim2.new(0, 45, 0, 45)
     b.Position = UDim2.new(d.x, -22, d.y, -22)
     b.BackgroundColor3 = Color3.fromRGB(70, 100, 180)
-    b.Text = d.name
+    b.Text = d.n
     b.TextColor3 = Color3.fromRGB(255, 255, 255)
     b.Font = Enum.Font.GothamBold
     b.TextSize = 18
     Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
-    b.MouseButton1Down:Connect(function() flyDirs[d.dir] = true end)
-    b.MouseButton1Up:Connect(function() flyDirs[d.dir] = false end)
-    b.MouseLeave:Connect(function() flyDirs[d.dir] = false end)
+    b.MouseButton1Down:Connect(function() fDirs[d.d] = true end)
+    b.MouseButton1Up:Connect(function() fDirs[d.d] = false end)
+    b.MouseLeave:Connect(function() fDirs[d.d] = false end)
 end
 
--- ===== SPEED (bản thân) =====
+-- Speed logic
 local isSpeed, oldSpeed, speedConn = false, 16, nil
-
 speedBtn.MouseButton1Click:Connect(function()
     isSpeed = not isSpeed
     if isSpeed then
         speedBtn.Text = "⚡ SPEED: BẬT"
         speedBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-        local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
         if h then oldSpeed = h.WalkSpeed end
         speedConn = RS.Heartbeat:Connect(function()
-            local c = player.Character
+            local c = LP.Character
             if c then
                 local h = c:FindFirstChildOfClass("Humanoid")
                 if h then h.WalkSpeed = tonumber(speedBox.Text) or 100 end
@@ -315,21 +224,20 @@ speedBtn.MouseButton1Click:Connect(function()
         speedBtn.Text = "⚡ SPEED: TẮT"
         speedBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
         if speedConn then speedConn:Disconnect(); speedConn = nil end
-        local h = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
         if h then h.WalkSpeed = oldSpeed end
     end
 end)
 
--- ===== FLY (bản thân) =====
+-- Fly logic
 local isFly, flyConn, bv = false, nil, nil
-
 flyBtn.MouseButton1Click:Connect(function()
     isFly = not isFly
     if isFly then
         flyBtn.Text = "🕊️ BAY: BẬT"
         flyBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
         fc.Visible = true
-        local c = player.Character
+        local c = LP.Character
         if not c then isFly = false; fc.Visible = false; return end
         local hrp = c:FindFirstChild("HumanoidRootPart")
         if not hrp then isFly = false; fc.Visible = false; return end
@@ -343,12 +251,12 @@ flyBtn.MouseButton1Click:Connect(function()
             local dir = Vector3.new(0, 0, 0)
             local look = cam.CFrame.LookVector
             local right = cam.CFrame.RightVector
-            if flyDirs.forward then dir = dir + look end
-            if flyDirs.back then dir = dir - look end
-            if flyDirs.right then dir = dir + right end
-            if flyDirs.left then dir = dir - right end
-            if flyDirs.up then dir = dir + Vector3.new(0, 1, 0) end
-            if flyDirs.down then dir = dir - Vector3.new(0, 1, 0) end
+            if fDirs.forward then dir = dir + look end
+            if fDirs.back then dir = dir - look end
+            if fDirs.right then dir = dir + right end
+            if fDirs.left then dir = dir - right end
+            if fDirs.up then dir = dir + Vector3.new(0, 1, 0) end
+            if fDirs.down then dir = dir - Vector3.new(0, 1, 0) end
             if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + look end
             if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - look end
             if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - right end
@@ -363,12 +271,12 @@ flyBtn.MouseButton1Click:Connect(function()
         fc.Visible = false
         if flyConn then flyConn:Disconnect(); flyConn = nil end
         if bv then bv:Destroy(); bv = nil end
-        for k, _ in pairs(flyDirs) do flyDirs[k] = false end
+        for k, _ in pairs(fDirs) do fDirs[k] = false end
     end
 end)
 
 -- =====================================================
--- ===== TAB TP =====
+-- ===== TAB TP (có KÉO + GIỮ) =====
 -- =====================================================
 local playerList = Instance.new("ScrollingFrame", pageTP)
 playerList.Size = UDim2.new(0.9, 0, 0, 250)
@@ -384,12 +292,14 @@ local lp = Instance.new("UIPadding", playerList)
 lp.PaddingTop = UDim.new(0, 5)
 lp.PaddingLeft = UDim.new(0, 5)
 
+local keepConns = {}   -- Lưu connection KÉO GIỮ
+
 function updatePlayerList()
     for _, c in pairs(playerList:GetChildren()) do
         if c:IsA("Frame") then c:Destroy() end
     end
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player then
+        if p ~= LP then
             local row = Instance.new("Frame", playerList)
             row.Size = UDim2.new(1, -10, 0, 32)
             row.BackgroundColor3 = Color3.fromRGB(60, 60, 90)
@@ -397,37 +307,22 @@ function updatePlayerList()
             Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
 
             local n = Instance.new("TextLabel", row)
-            n.Size = UDim2.new(0.5, 0, 1, 0)
+            n.Size = UDim2.new(0.4, 0, 1, 0)
             n.Position = UDim2.new(0, 5, 0, 0)
             n.BackgroundTransparency = 1
             n.Text = "👤 " .. p.Name
             n.TextColor3 = Color3.fromRGB(255, 255, 255)
             n.Font = Enum.Font.Gotham
-            n.TextSize = 11
+            n.TextSize = 10
             n.TextXAlignment = Enum.TextXAlignment.Left
+            n.TextTruncate = Enum.TextTruncate.AtEnd
 
-            local gb = Instance.new("TextButton", row)
-            gb.Size = UDim2.new(0.22, 0, 0, 22)
-            gb.Position = UDim2.new(0.52, 0, 0, 5)
-            gb.BackgroundColor3 = Color3.fromRGB(60, 150, 200)
-            gb.Text = "ĐẾN"
-            gb.TextColor3 = Color3.fromRGB(255, 255, 255)
-            gb.Font = Enum.Font.GothamBold
-            gb.TextSize = 10
-            Instance.new("UICorner", gb).CornerRadius = UDim.new(0, 5)
-
-            local bb = Instance.new("TextButton", row)
-            bb.Size = UDim2.new(0.22, 0, 0, 22)
-            bb.Position = UDim2.new(0.76, 0, 0, 5)
-            bb.BackgroundColor3 = Color3.fromRGB(200, 100, 60)
-            bb.Text = "KÉO"
-            bb.TextColor3 = Color3.fromRGB(255, 255, 255)
-            bb.Font = Enum.Font.GothamBold
-            bb.TextSize = 10
-            Instance.new("UICorner", bb).CornerRadius = UDim.new(0, 5)
+            local gb = btn(row, "ĐẾN", 0.4, 5, 0.18, 22, Color3.fromRGB(60, 150, 200), 9)
+            local bb = btn(row, "KÉO", 0.6, 5, 0.18, 22, Color3.fromRGB(200, 100, 60), 9)
+            local kb = btn(row, "GIỮ", 0.8, 5, 0.18, 22, Color3.fromRGB(150, 80, 200), 9)
 
             gb.MouseButton1Click:Connect(function()
-                local mc, tc = player.Character, p.Character
+                local mc, tc = LP.Character, p.Character
                 if mc and tc then
                     local mh = mc:FindFirstChild("HumanoidRootPart")
                     local th = tc:FindFirstChild("HumanoidRootPart")
@@ -436,11 +331,35 @@ function updatePlayerList()
             end)
 
             bb.MouseButton1Click:Connect(function()
-                local mc, tc = player.Character, p.Character
+                local mc, tc = LP.Character, p.Character
                 if mc and tc then
                     local mh = mc:FindFirstChild("HumanoidRootPart")
                     local th = tc:FindFirstChild("HumanoidRootPart")
                     if mh and th then th.CFrame = mh.CFrame + Vector3.new(0, 0, 3) end
+                end
+            end)
+
+            -- 🆕 GIỮ — Kéo liên tục, không cho họ về vị trí cũ
+            kb.MouseButton1Click:Connect(function()
+                if keepConns[p] then
+                    keepConns[p]:Disconnect()
+                    keepConns[p] = nil
+                    kb.BackgroundColor3 = Color3.fromRGB(150, 80, 200)
+                    kb.Text = "GIỮ"
+                else
+                    kb.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+                    kb.Text = "THẢ"
+                    keepConns[p] = RS.Heartbeat:Connect(function()
+                        local mc = LP.Character
+                        local tc = p.Character
+                        if not mc or not tc then return end
+                        local mh = mc:FindFirstChild("HumanoidRootPart")
+                        local th = tc:FindFirstChild("HumanoidRootPart")
+                        if mh and th then
+                            -- Ghim liên tục — càng ngắn khoảng cách càng tốt
+                            th.CFrame = mh.CFrame + Vector3.new(0, 0, 3)
+                        end
+                    end)
                 end
             end)
         end
@@ -449,20 +368,15 @@ end
 
 updatePlayerList()
 Players.PlayerAdded:Connect(function() task.wait(1) updatePlayerList() end)
-Players.PlayerRemoving:Connect(updatePlayerList)
+Players.PlayerRemoving:Connect(function(p)
+    if keepConns[p] then keepConns[p]:Disconnect(); keepConns[p] = nil end
+    updatePlayerList()
+end)
 
 -- =====================================================
 -- ===== TAB ESP =====
 -- =====================================================
-local espBtn = Instance.new("TextButton", pageESP)
-espBtn.Size = UDim2.new(0.9, 0, 0, 35)
-espBtn.Position = UDim2.new(0.05, 0, 0, 10)
-espBtn.BackgroundColor3 = Color3.fromRGB(60, 200, 100)
-espBtn.Text = "👁️ ESP: TẮT"
-espBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-espBtn.Font = Enum.Font.GothamBold
-espBtn.TextSize = 13
-Instance.new("UICorner", espBtn).CornerRadius = UDim.new(0, 8)
+local espBtn = btn(pageESP, "👁️ ESP: TẮT", 0.05, 10, 0.9, 35, Color3.fromRGB(60, 200, 100), 13)
 
 local espActive, espObjects = false, {}
 
@@ -506,9 +420,9 @@ local function createESP(p)
 
     local conn = RS.RenderStepped:Connect(function()
         if not espActive then return end
-        if not p.Character or not player.Character then return end
+        if not p.Character or not LP.Character then return end
         local a = p.Character:FindFirstChild("HumanoidRootPart")
-        local b = player.Character:FindFirstChild("HumanoidRootPart")
+        local b = LP.Character:FindFirstChild("HumanoidRootPart")
         if a and b then dl.Text = math.floor((a.Position - b.Position).Magnitude) .. " studs" end
     end)
     table.insert(espObjects[p], {Disconnect = function() conn:Disconnect() end})
@@ -526,7 +440,7 @@ end
 
 local function updateAllESP()
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player then
+        if p ~= LP then
             if espActive then createESP(p) else removeESP(p) end
         end
     end
@@ -547,24 +461,122 @@ Players.PlayerAdded:Connect(function(p)
 end)
 Players.PlayerRemoving:Connect(removeESP)
 
--- ===== XÁC NHẬN MẬT KHẨU =====
-cb.MouseButton1Click:Connect(function()
-    if pb.Text == MK then
+-- =====================================================
+-- ===== TAB TOOL (4 chức năng mới) =====
+-- =====================================================
+
+-- 🚪 NOCLIP
+local noclipBtn = btn(pageTool, "🚪 NOCLIP: TẮT", 0.05, 5, 0.9, 30, Color3.fromRGB(60, 200, 100))
+local noclipActive, noclipConn = false, nil
+noclipBtn.MouseButton1Click:Connect(function()
+    noclipActive = not noclipActive
+    noclipBtn.Text = noclipActive and "🚪 NOCLIP: BẬT" or "🚪 NOCLIP: TẮT"
+    noclipBtn.BackgroundColor3 = noclipActive and Color3.fromRGB(200, 60, 60) or Color3.fromRGB(60, 200, 100)
+    if noclipActive then
+        noclipConn = RS.Stepped:Connect(function()
+            local c = LP.Character
+            if not c then return end
+            for _, part in pairs(c:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect(); noclipConn = nil end
+        local c = LP.Character
+        if c then
+            for _, part in pairs(c:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = true end
+            end
+        end
+    end
+end)
+
+-- 👻 TÀNG HÌNH
+local invisBtn = btn(pageTool, "👻 TÀNG HÌNH: TẮT", 0.05, 40, 0.9, 30, Color3.fromRGB(60, 200, 100))
+local invisActive = false
+invisBtn.MouseButton1Click:Connect(function()
+    invisActive = not invisActive
+    invisBtn.Text = invisActive and "👻 TÀNG HÌNH: BẬT" or "👻 TÀNG HÌNH: TẮT"
+    invisBtn.BackgroundColor3 = invisActive and Color3.fromRGB(200, 60, 60) or Color3.fromRGB(60, 200, 100)
+    local c = LP.Character
+    if c then
+        for _, part in pairs(c:GetDescendants()) do
+            if part:IsA("BasePart") or part:IsA("Decal") then
+                part.Transparency = invisActive and 1 or 0
+            end
+        end
+    end
+end)
+
+-- 🛡️ ANTI-AFK
+local afkBtn = btn(pageTool, "🛡️ ANTI-AFK: TẮT", 0.05, 75, 0.9, 30, Color3.fromRGB(60, 200, 100))
+local afkActive, afkThread = false, nil
+afkBtn.MouseButton1Click:Connect(function()
+    afkActive = not afkActive
+    afkBtn.Text = afkActive and "🛡️ ANTI-AFK: BẬT" or "🛡️ ANTI-AFK: TẮT"
+    afkBtn.BackgroundColor3 = afkActive and Color3.fromRGB(200, 60, 60) or Color3.fromRGB(60, 200, 100)
+    if afkActive then
+        afkThread = task.spawn(function()
+            while afkActive do
+                local vu = game:GetService("VirtualUser")
+                pcall(function()
+                    vu:CaptureController()
+                    vu:ClickButton2(Vector2.new())
+                end)
+                task.wait(60)
+            end
+        end)
+    else
+        if afkThread then task.cancel(afkThread); afkThread = nil end
+    end
+end)
+
+-- 💡 FULLBRIGHT
+local fbBtn = btn(pageTool, "💡 FULLBRIGHT: TẮT", 0.05, 110, 0.9, 30, Color3.fromRGB(60, 200, 100))
+local fbActive = false
+local oldL = {}
+fbBtn.MouseButton1Click:Connect(function()
+    fbActive = not fbActive
+    fbBtn.Text = fbActive and "💡 FULLBRIGHT: BẬT" or "💡 FULLBRIGHT: TẮT"
+    fbBtn.BackgroundColor3 = fbActive and Color3.fromRGB(200, 60, 60) or Color3.fromRGB(60, 200, 100)
+    local L = game:GetService("Lighting")
+    if fbActive then
+        oldL = {
+            Brightness = L.Brightness,
+            ClockTime = L.ClockTime,
+            FogEnd = L.FogEnd,
+            Ambient = L.Ambient,
+            OutdoorAmbient = L.OutdoorAmbient,
+        }
+        L.Brightness = 3
+        L.ClockTime = 14
+        L.FogEnd = 100000
+        L.Ambient = Color3.fromRGB(200, 200, 200)
+        L.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+    else
+        for k, v in pairs(oldL) do L[k] = v end
+    end
+end)
+
+-- =====================================================
+-- ===== MẬT KHẨU =====
+-- =====================================================
+cbtn.MouseButton1Click:Connect(function()
+    if pb.Text == "menu lam boi matcuoi290" then
         pf.Visible = false
         mf.Visible = true
         updatePlayerList()
     else
-        tb.Text = "a con chó"
+        tbx.Text = "a con chó"
         pb.Text = ""
     end
 end)
-
 pb.FocusLost:Connect(function(enter)
-    if enter then cb:Activate() end
+    if enter then cbtn:Activate() end
 end)
 
 -- ===== TỰ TẮT KHI HỒI SINH =====
-player.CharacterAdded:Connect(function()
+LP.CharacterAdded:Connect(function()
     isSpeed, isFly = false, false
     if speedConn then speedConn:Disconnect(); speedConn = nil end
     if flyConn then flyConn:Disconnect(); flyConn = nil end
