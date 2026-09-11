@@ -1,118 +1,114 @@
---[[ V32 — HOÀN HẢO | FIX PICK + SELL | KHÔNG TELE XA | CHÍNH XÁC REMOTE ]]
+--[[ V33 — FIX HOÀN TOÀN | PICK + SELL + ĐỌC TÚI | KHÔNG TELE ]]
 -- Mật khẩu: bymatcuoi290
 repeat task.wait(0.2) until game:IsLoaded() and game.Players.LocalPlayer and game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 task.wait(1.5)
 
-local P,RS,CS,UIS,VIM = game:GetService("Players"),game:GetService("ReplicatedStorage"),game:GetService("CollectionService"),game:GetService("UserInputService"),game:GetService("VirtualInputManager")
+local P, RS, CS, UIS, VIM = game:GetService("Players"), game:GetService("ReplicatedStorage"), game:GetService("CollectionService"), game:GetService("UserInputService"), game:GetService("VirtualInputManager")
 local plr = P.LocalPlayer; local pg = plr:WaitForChild("PlayerGui"); local cam = workspace.CurrentCamera
-local char = plr.Character; local hrp = char:WaitForChild("HumanoidRootPart")
-local hum = char:WaitForChild("Humanoid")
-plr.CharacterAdded:Connect(function(c) char = c; hrp = c:WaitForChild("HumanoidRootPart"); hum = c:WaitForChild("Humanoid") end)
+local char = plr.Character; local hrp = char:WaitForChild("HumanoidRootPart"); local hum = char:WaitForChild("Humanoid")
+
+plr.CharacterAdded:Connect(function(c) 
+    char = c; hrp = c:WaitForChild("HumanoidRootPart"); hum = c:WaitForChild("Humanoid") 
+end)
 
 local GP = pg; pcall(function() if type(gethui) == "function" then GP = gethui() or pg end end)
 pcall(function() for _,g in ipairs(pg:GetChildren()) do if g:IsA("ScreenGui") and (g.Name:find("Needle") or g.Name:find("Hay")) then g:Destroy() end end end)
 
--- === REMOTE CHÍNH XÁC THEO THÔNG TIN GAME ===
+-- === REMOTE CHÍNH XÁC theo game ===
 local NH = RS:FindFirstChild("NeedleHaystack")
-local Pick = NH and NH:FindFirstChild("PickHay")
-local Sell = NH and NH:FindFirstChild("SellHay")
-local Buy = NH and NH:FindFirstChild("BuyUpgrade")
-local savedPos, lastSellTick = nil, 0
+local PickHay = NH and NH:FindFirstChild("PickHay")
+local SellHay = NH and NH:FindFirstChild("SellHay")
+local BuyUpgrade = NH and NH:FindFirstChild("BuyUpgrade")
+local lastSell = 0
 
 -- =============================================
--- 🎯 AUTO PICK — GỬI REMOTE CHÍNH XÁC + E LIÊN TỤC
+-- 🎯 AUTO PICK — GỬI REMOTE CHÍNH XÁC
 -- =============================================
-local function pickFast()
-    -- 1. Gửi Remote PickHay — chính xác nhất
-    if Pick then
-        pcall(function() Pick:FireServer() end)
-        pcall(function() Pick:FireServer() end)
+local function Pick()
+    if PickHay then
+        pcall(function() PickHay:FireServer() end)
+        pcall(function() PickHay:FireServer() end)
     end
-    -- 2. Nhấn E (tương tác game)
+    -- Nhấn E tương tác
     pcall(function()
         VIM:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-        task.wait(0.03)
+        task.wait(0.02)
         VIM:SendKeyEvent(false, Enum.KeyCode.E, false, game)
     end)
-    -- 3. Tap trung tâm màn hình
-    local vp = cam.ViewportSize
-    pcall(function() VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, true, game, 1) end)
-    task.wait(0.02)
-    pcall(function() VIM:SendMouseButtonEvent(vp.X/2, vp.Y/2, 0, false, game, 1) end)
 end
 
 -- =============================================
--- 💰 AUTO SELL — ĐẾN GẦN SELLPART + GỬI REMOTE
+-- 💰 AUTO SELL — ĐẾN GẦN + GỬI REMOTE
 -- =============================================
-local function getSellParts()
+local function GetSellParts()
     local t = {}
     pcall(function() for _,p in ipairs(CS:GetTagged("SellPart")) do if p:IsA("BasePart") then table.insert(t,p) end end end)
     return t
 end
 
-local function getNearestSellPart()
-    local best, minDist = nil, math.huge
-    for _,p in ipairs(getSellParts()) do
+local function NearestSell()
+    local best, minD = nil, math.huge
+    for _,p in ipairs(GetSellParts()) do
         if hrp then
             local d = (p.Position - hrp.Position).Magnitude
-            if d < minDist then minDist = d; best = p end
+            if d < minD then minD = d; best = p end
         end
     end
-    return best, minDist
+    return best, minD
 end
 
-local function goToSellPart()
-    local sp, dist = getNearestSellPart()
-    if not sp or not hrp or not hum then return false end
-    -- Nếu đã gần → không di chuyển
-    if dist < 8 then return true end
-    -- Đi đến sát SellPart — KHÔNG TELE
-    pcall(function() hum:MoveTo(sp.Position + Vector3.new(math.random(-3,3), 0, math.random(-3,3))) end)
+local function GoSell()
+    local sp, dist = NearestSell()
+    if not sp or not hum then return false end
+    if dist < 6 then return true end
+    -- Đi bộ — KHÔNG TELE
+    pcall(function() hum:MoveTo(sp.Position + Vector3.new(0,0,3)) end)
     task.wait(0.8)
     return true
 end
 
-local function doSellFull()
+local function Sell()
     if not hrp then return end
-    -- 1. Đi đến nơi bán
-    local ok = goToSellPart()
+    local ok = GoSell()
     if not ok then return end
     task.wait(0.3)
-    -- 2. Gửi Remote SellHay — chính xác
-    if Sell then
-        for i = 1, 5 do
-            pcall(function() Sell:FireServer() end)
-            task.wait(0.08)
+    -- Gửi Remote chính xác
+    if SellHay then
+        for i=1,5 do
+            pcall(function() SellHay:FireServer() end)
+            task.wait(0.06)
         end
     end
-    -- 3. Kích hoạt tất cả cách tương tác
-    for _,p in ipairs(getSellParts()) do
-        pcall(function() firetouchinterest(hrp, p, 0); task.wait(0.05); firetouchinterest(hrp, p, 1) end)
-        pcall(function() local cd = p:FindFirstChildOfClass("ClickDetector"); if cd then fireclickdetector(cd) end end)
-        pcall(function() local pp = p:FindFirstChildOfClass("ProximityPrompt"); if pp then fireproximityprompt(pp) end end)
+    -- Kích hoạt tất cả cách bán
+    for _,p in ipairs(GetSellParts()) do
+        pcall(function() firetouchinterest(hrp,p,0); task.wait(0.05); firetouchinterest(hrp,p,1) end)
+        pcall(function() local cd=p:FindFirstChildOfClass("ClickDetector"); if cd then fireclickdetector(cd) end end)
+        pcall(function() local pp=p:FindFirstChildOfClass("ProximityPrompt"); if pp then fireproximityprompt(pp) end end)
     end
-    lastSellTick = tick()
+    lastSell = tick()
 end
 
 -- =============================================
--- 📖 ĐỌC THÔNG TIN TÚI & TIỀN
+-- 📖 ĐỌC TÚI — CẢI THIỆN CHÍNH XÁC
 -- =============================================
-local function getBag()
+local function GetBag()
+    -- Ưu tiên tìm label có chữ hay
     for _,g in ipairs(pg:GetDescendants()) do
         if (g:IsA("TextLabel") or g:IsA("TextButton")) and g.Visible then
-            local cur, max = g.Text:match("(%d+)%s*/%s*(%d+)")
-            if cur and max then
-                local l = g.Text:lower()
-                if l:find("hay") or l:find("rơm") or l:find("collect") then
-                    return tonumber(cur), tonumber(max)
+            local c,m = g.Text:match("(%d+)%s*/%s*(%d+)")
+            if c and m then
+                local txt = g.Text:lower()
+                if txt:find("hay") or txt:find("collect") or txt:find("rơm") then
+                    return tonumber(c), tonumber(m)
                 end
             end
         end
     end
+    -- Tìm bất kỳ X/Y nào
     for _,g in ipairs(pg:GetDescendants()) do
         if g:IsA("TextLabel") and g.Visible then
-            local cur, max = g.Text:match("(%d+)%s*/%s*(%d+)")
-            if cur and max then return tonumber(cur), tonumber(max) end
+            local c,m = g.Text:match("(%d+)%s*/%s*(%d+)")
+            if c and m then return tonumber(c), tonumber(m) end
         end
     end
     return nil, nil
@@ -121,104 +117,146 @@ end
 -- =============================================
 -- 🎯 ESP KIM
 -- =============================================
-local espOn = false; local espObjs = {}
-local function isNeedleObj(o)
+local ESP_On = false; local ESP_List = {}
+local function IsNeedle(o)
     if not o or (not o:IsA("BasePart") and not o:IsA("Model")) then return false end
     local n = o.Name:lower()
-    for _,k in ipairs({"needle","kim","haystack","hidden"}) do if n:find(k) then return true end end
-    return false
+    return n:find("needle") or n:find("kim") or n:find("haystack")
 end
-local function addESP(o)
-    if espObjs[o] then return end
-    local tp = o:IsA("Model") and (o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")) or o
-    if not tp then return end
-    local hl = Instance.new("Highlight"); hl.FillColor = Color3.fromRGB(255,0,0); hl.OutlineColor = Color3.fromRGB(255,255,0); hl.FillTransparency = 0.3; hl.Adornee = o; hl.Parent = o
-    local bb = Instance.new("BillboardGui"); bb.Size = UDim2.new(0,120,0,35); bb.AlwaysOnTop = true; bb.Adornee = tp; bb.Parent = tp
-    local lb = Instance.new("TextLabel"); lb.Size = UDim2.new(1,0,1,0); lb.BackgroundTransparency = 1; lb.TextColor3 = Color3.new(1,0,0); lb.Text = "🎯 "..o.Name; lb.TextSize = 12; lb.Font = Enum.Font.GothamBold; lb.Parent = bb
-    espObjs[o] = {hl=hl,bb=bb}
+local function ESP_Add(o)
+    if ESP_List[o] then return end
+    local p = o:IsA("Model") and (o.PrimaryPart or o:FindFirstChildWhichIsA("BasePart")) or o
+    if not p then return end
+    local hl = Instance.new("Highlight")
+    hl.FillColor = Color3.fromRGB(255,0,0)
+    hl.OutlineColor = Color3.fromRGB(255,255,0)
+    hl.FillTransparency = 0.3
+    hl.Adornee = o; hl.Parent = o
+    ESP_List[o] = hl
 end
-local function clearESP() for _,d in pairs(espObjs) do pcall(function() d.hl:Destroy(); d.bb:Destroy() end) end; espObjs = {} end
-task.spawn(function() while task.wait(0.5) do if espOn then for _,o in ipairs(workspace:GetDescendants()) do if isNeedleObj(o) then addESP(o) end end end end end)
+local function ESP_Clear() for _,v in pairs(ESP_List) do pcall(function() v:Destroy() end) end; ESP_List = {} end
+task.spawn(function() while task.wait(0.5) do if ESP_On then for _,o in ipairs(workspace:GetDescendants()) do if IsNeedle(o) then ESP_Add(o) end end end end end)
 
 -- =============================================
--- 🖥️ GUI & CONTROLS
+-- 🖥️ GUI
 -- =============================================
-local function mkC(p,r) local c=Instance.new("UICorner"); c.CornerRadius=UDim.new(0,r); c.Parent=p end
-local function mkBtn(p,txt,pos,sz,bg,tc,fs) local b=Instance.new("TextButton"); b.Size=sz; b.Position=pos; b.BackgroundColor3=bg; b.TextColor3=tc; b.Text=txt; b.Font=Enum.Font.GothamBold; b.TextSize=fs; b.Active=true; b.Parent=p; mkC(b,6); return b end
-local function onBtn(b,fn) b.Activated:Connect(fn); b.MouseButton1Click:Connect(fn) end
+local function Corner(p,r) local c=Instance.new("UICorner"); c.CornerRadius=UDim.new(0,r); c.Parent=p end
+local function Btn(p,txt,x,y,w,h,bg,tc,fs)
+    local b=Instance.new("TextButton")
+    b.Size=UDim2.new(0,w,0,h); b.Position=UDim2.new(0,x,0,y)
+    b.BackgroundColor3=bg; b.TextColor3=tc; b.Text=txt
+    b.Font=Enum.Font.GothamBold; b.TextSize=fs; b.Active=true; b.Parent=p
+    Corner(b,6); return b
+end
 
--- PASSWORD GUI
-local psg = Instance.new("ScreenGui"); psg.Name="NeedlePassV32"; psg.ResetOnSpawn=false; psg.ZIndex=1000; psg.Parent=GP
-local pf = Instance.new("Frame"); pf.Size=UDim2.new(0,320,0,260); pf.Position=UDim2.new(0.5,-160,0.5,-130); pf.BackgroundColor3=Color3.fromRGB(25,25,25); pf.Active=true; pf.Parent=psg; mkC(pf,12)
-local pt = Instance.new("TextLabel"); pt.Size=UDim2.new(1,0,0,45); pt.BackgroundColor3=Color3.new(1,1,1); pt.TextColor3=Color3.new(0,0,0); pt.Text="🔒 NHẬP MẬT KHẨU"; pt.Font=Enum.Font.GothamBold; pt.TextSize=18; pt.Parent=pf; mkC(pt,12)
-local pin = Instance.new("TextBox"); pin.Size=UDim2.new(0,260,0,50); pin.Position=UDim2.new(0,30,0,70); pin.BackgroundColor3=Color3.fromRGB(60,60,60); pin.TextColor3=Color3.fromRGB(0,255,100); pin.PlaceholderText="Nhập mật khẩu..."; pin.Text=""; pin.Font=Enum.Font.GothamBold; pin.TextSize=16; pin.Parent=pf; mkC(pin,8)
-local stt = Instance.new("TextLabel"); stt.Size=UDim2.new(1,0,0,25); stt.Position=UDim2.new(0,0,0,130); stt.BackgroundTransparency=1; stt.TextColor3=Color3.fromRGB(255,200,0); stt.Text="Mật khẩu: bymatcuoi290"; stt.Font=Enum.Font.Gotham; stt.TextSize=12; stt.Parent=pf
-local pb = mkBtn(pf,"✓ XÁC NHẬN",UDim2.new(0,30,0,165),UDim2.new(0,260,0,50),Color3.fromRGB(0,255,100),Color3.new(0,0,0),20)
-local skb = mkBtn(pf,"BỎ QUA",UDim2.new(0,30,0,225),UDim2.new(0,260,0,25),Color3.fromRGB(80,80,80),Color3.new(1,1,1),12)
+-- MẬT KHẨU
+local PassUI = Instance.new("ScreenGui"); PassUI.Name="NeedlePassV33"; PassUI.Parent=GP
+local PassFrame = Instance.new("Frame")
+PassFrame.Size=UDim2.new(0,320,0,260); PassFrame.Position=UDim2.new(0.5,-160,0.5,-130)
+PassFrame.BackgroundColor3=Color3.fromRGB(25,25,25); PassFrame.Active=true; PassFrame.Parent=PassUI
+Corner(PassFrame,12)
+local PassTitle = Instance.new("TextLabel")
+PassTitle.Size=UDim2.new(1,0,0,45); PassTitle.BackgroundColor3=Color3.new(1,1,1)
+PassTitle.TextColor3=Color3.new(0,0,0); PassTitle.Text="🔒 NHẬP MẬT KHẨU"
+PassTitle.Font=Enum.Font.GothamBold; PassTitle.TextSize=18; PassTitle.Parent=PassFrame
+Corner(PassTitle,12)
+local PassInput = Instance.new("TextBox")
+PassInput.Size=UDim2.new(0,260,0,50); PassInput.Position=UDim2.new(0,30,0,70)
+PassInput.BackgroundColor3=Color3.fromRGB(60,60,60); PassInput.TextColor3=Color3.fromRGB(0,255,100)
+PassInput.PlaceholderText="bymatcuoi290"; PassInput.Text=""
+PassInput.Font=Enum.Font.GothamBold; PassInput.TextSize=16; PassInput.Parent=PassFrame
+Corner(PassInput,8)
+local PassStatus = Instance.new("TextLabel")
+PassStatus.Size=UDim2.new(1,0,0,25); PassStatus.Position=UDim2.new(0,0,0,130)
+PassStatus.BackgroundTransparency=1; PassStatus.TextColor3=Color3.fromRGB(255,200,0)
+PassStatus.Text="Nhập mật khẩu → XÁC NHẬN"; PassStatus.Font=Enum.Font.Gotham; PassStatus.TextSize=12; PassStatus.Parent=PassFrame
+local PassOK = Btn(PassFrame,"✓ XÁC NHẬN",30,165,260,50,Color3.fromRGB(0,255,100),Color3.new(0,0,0),20)
+local PassSkip = Btn(PassFrame,"BỎ QUA",30,225,260,25,Color3.fromRGB(80,80,80),Color3.new(1,1,1),12)
 
 -- MAIN GUI
-local sg = Instance.new("ScreenGui"); sg.Name="NeedleFarmV32"; sg.ResetOnSpawn=false; sg.Parent=GP
-local main = Instance.new("Frame"); main.Size=UDim2.new(0,290,0,380); main.Position=UDim2.new(0.5,-145,0.5,-190); main.BackgroundColor3=Color3.fromRGB(15,15,15); main.Active=true; main.Draggable=true; main.Visible=false; main.Parent=sg; mkC(main,10)
-local title = mkBtn(main,"🌾 NEEDLE FARM V32 — HOÀN HẢO",UDim2.new(0,0,0,0),UDim2.new(1,0,0,40),Color3.new(1,1,1),Color3.new(0,0,0),13); title.Active=false
-local close = mkBtn(main,"X",UDim2.new(1,-35,0,5),UDim2.new(0,30,0,30),Color3.fromRGB(255,50,50),Color3.new(1,1,1),14)
-close.MouseButton1Click:Connect(function() main.Visible=false end)
-local info = Instance.new("TextLabel"); info.Size=UDim2.new(0,250,0,45); info.Position=UDim2.new(0,20,0,50); info.BackgroundColor3=Color3.fromRGB(30,30,30); info.TextColor3=Color3.fromRGB(0,255,100); info.Text="🎒 Đang đọc..."; info.Font=Enum.Font.Gotham; info.TextSize=11; info.TextWrapped=true; info.Parent=main; mkC(info,5)
+local MainUI = Instance.new("ScreenGui"); MainUI.Name="NeedleFarmV33"; MainUI.ResetOnSpawn=false; MainUI.Parent=GP
+local MainFrame = Instance.new("Frame")
+MainFrame.Size=UDim2.new(0,290,0,390); MainFrame.Position=UDim2.new(0.5,-145,0.5,-195)
+MainFrame.BackgroundColor3=Color3.fromRGB(15,15,15); MainFrame.Active=true; MainFrame.Draggable=true; MainFrame.Visible=false; MainFrame.Parent=MainUI
+Corner(MainFrame,10)
+local MainTitle = Btn(MainFrame,"🌾 NEEDLE FARM V33 — ĐÃ SỬA",0,0,290,40,Color3.new(1,1,1),Color3.new(0,0,0),13); MainTitle.Active=false
+local CloseBtn = Btn(MainFrame,"X",255,5,30,30,Color3.fromRGB(255,50,50),Color3.new(1,1,1),14)
+CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible=false end)
+local Info = Instance.new("TextLabel")
+Info.Size=UDim2.new(0,250,0,50); Info.Position=UDim2.new(0,20,0,50)
+Info.BackgroundColor3=Color3.fromRGB(30,30,30); Info.TextColor3=Color3.fromRGB(0,255,100)
+Info.Text="🔄 Đang khởi động..."; Info.Font=Enum.Font.Gotham; Info.TextSize=11; Info.TextWrapped=true; Info.Parent=MainFrame
+Corner(Info,5)
 
-local aPick, aSell = false, false
-local function mkTog(name,y,cb)
-    local b = mkBtn(main,name..": OFF",UDim2.new(0,20,0,y),UDim2.new(0,250,0,40),Color3.fromRGB(35,35,35),Color3.new(1,1,1),12)
-    local on = false
-    onBtn(b,function() on=not on; b.BackgroundColor3=on and Color3.fromRGB(0,180,90) or Color3.fromRGB(35,35,35); b.Text=name..(on and ": ON ✅" or ": OFF ❌"); cb(on) end)
+local AutoPick, AutoSell = false, false
+local function Toggle(name,y,func)
+    local b = Btn(MainFrame,name..": OFF",20,y,250,42,Color3.fromRGB(35,35,35),Color3.new(1,1,1),12)
+    local On = false
+    b.MouseButton1Click:Connect(function()
+        On = not On
+        b.BackgroundColor3 = On and Color3.fromRGB(0,180,90) or Color3.fromRGB(35,35,35)
+        b.Text = name..(On and ": ON ✅" or ": OFF ❌")
+        func(On)
+    end)
 end
 
-mkTog("⚡ Auto Pick",105,function(v) aPick=v end)
-mkTog("💰 Auto Sell",155,function(v) aSell=v; lastSellTick=tick() end)
-mkTog("🎯 ESP Kim",205,function(v) espOn=v; if not v then clearESP() end end)
+Toggle("⚡ Auto Pick",110,function(v) AutoPick=v end)
+Toggle("💰 Auto Sell",165,function(v) AutoSell=v; lastSell=tick() end)
+Toggle("🎯 ESP Kim",220,function(v) ESP_On=v; if not v then ESP_Clear() end end)
 
-local sellNow = mkBtn(main,"💵 BÁN NGAY",UDim2.new(0,20,0,260),UDim2.new(0,250,0,40),Color3.fromRGB(255,200,0),Color3.new(0,0,0),14)
-onBtn(sellNow,function() task.spawn(function() doSellFull(); info.Text="✅ Bán xong!"; task.wait(2) end) end)
+local SellNow = Btn(MainFrame,"💵 BÁN NGAY",20,280,250,45,Color3.fromRGB(255,200,0),Color3.new(0,0,0),14)
+SellNow.MouseButton1Click:Connect(function() task.spawn(function() Sell(); Info.Text="✅ Bán xong!"; task.wait(2) end) end)
 
-local unlock = function() psg:Destroy(); main.Visible=true end
-onBtn(pb,function() if pin.Text=="bymatcuoi290" then stt.TextColor3=Color3.fromRGB(0,255,0); stt.Text="✅ Đúng mật khẩu!"; task.wait(0.3); unlock() else stt.TextColor3=Color3.fromRGB(255,50,50); stt.Text="❌ Sai mật khẩu!" end end)
-onBtn(skb,unlock)
+-- MỞ KHÓA
+local function Unlock() PassUI:Destroy(); MainFrame.Visible=true end
+PassOK.MouseButton1Click:Connect(function()
+    if PassInput.Text == "bymatcuoi290" then
+        PassStatus.TextColor3 = Color3.fromRGB(0,255,0)
+        PassStatus.Text = "✅ Đúng mật khẩu!"
+        task.wait(0.3); Unlock()
+    else
+        PassStatus.TextColor3 = Color3.fromRGB(255,50,50)
+        PassStatus.Text = "❌ Sai mật khẩu!"
+    end
+end)
+PassSkip.MouseButton1Click:Connect(Unlock)
 
-UIS.InputBegan:Connect(function(i,gp) if not gp and i.KeyCode==Enum.KeyCode.RightControl then main.Visible=not main.Visible end end)
+-- Phím tắt
+UIS.InputBegan:Connect(function(i,gp) if not gp and i.KeyCode==Enum.KeyCode.RightControl then MainFrame.Visible=not MainFrame.Visible end end)
 
 -- =============================================
--- 🔄 MAIN LOOPS — HOẠT ĐỘNG LIÊN TỤC
+-- 🔄 VÒNG LẶP CHÍNH — ĐÃ SỬA
 -- =============================================
 task.spawn(function()
-    while task.wait() do
+    while task.wait(0.05) do
         -- Cập nhật thông tin
-        local c,m = getBag()
-        local espCount = 0; for _ in pairs(espObjs) do espCount +=1 end
-        info.Text = (aPick and "⚡" or "💤").." Túi: "..(c and m and (c.."/"..m) or "?/?").." | 🎯 "..espCount.." kim"
+        local cur, max = GetBag()
+        local espCount = 0; for _ in pairs(ESP_List) do espCount += 1 end
+        Info.Text = (AutoPick and "⚡" or "💤").." Túi: "..(cur and max and (cur.."/"..max) or "?/?").." | 🎯 "..espCount.." kim"
         
         -- Auto Pick
-        if aPick then
-            pcall(pickFast)
+        if AutoPick then
+            pcall(Pick)
             task.wait(0.015)
-        else
-            task.wait(0.05)
         end
         
-        -- Auto Sell: khi đầy túi hoặc mỗi 8 giây
-        if aSell then
-            local shouldSell = false
-            if c and m and c >= m then shouldSell = true end
-            if not shouldSell and (tick() - lastSellTick) >= 8 then shouldSell = true end
-            if shouldSell then
-                aPick = false
+        -- Auto Sell — khi đầy túi hoặc mỗi 8 giây
+        if AutoSell then
+            local needSell = false
+            if cur and max and cur >= max then needSell = true end
+            if not needSell and (tick() - lastSell) >= 8 then needSell = true end
+            
+            if needSell then
+                AutoPick = false
                 task.wait(0.2)
-                doSellFull()
+                Sell()
                 task.wait(0.5)
-                aPick = true
+                AutoPick = true
             end
         end
-        task.wait(0.05)
     end
 end)
 
-print("✅ V32 ĐÃ NẠP — Auto Pick + Sell HOẠT ĐỘNG!")
+print("✅ V33 ĐÃ NẠP THÀNH CÔNG!")
 print("🔑 Mật khẩu: bymatcuoi290")
-print("⌨️ Ctrl phải: ẩn/hiện menu")
+print("⌨️ Ctrl phải: Ẩn/Hiện menu")
