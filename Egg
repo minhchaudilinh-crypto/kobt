@@ -1,0 +1,180 @@
+-- Delta & Xeno Compatible Testing GUI
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Xóa GUI cũ nếu đã tồn tại để tránh trùng lặp
+if PlayerGui:FindFirstChild("DevTestingPanel") then
+    PlayerGui.DevTestingPanel:Destroy()
+end
+
+-- Tạo ScreenGui chính
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DevTestingPanel"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+-- Khung chính (Main Frame)
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 280, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -160)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- Tiêu đề
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+Title.Text = "Dev Testing Tool (Multi-Exec)"
+Title.Font = Enum.Font.SourceSansBold
+Title.Parent = MainFrame
+
+-- Hàm tạo nút bấm (Button)
+local function createButton(name, posY, text)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Size = UDim2.new(0, 240, 0, 35)
+    btn.Position = UDim2.new(0.5, -120, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    btn.Text = text
+    btn.Font = Enum.Font.SourceSans
+    btn.Parent = MainFrame
+    return btn
+end
+
+-- 1. Anti-AFK
+local AntiAfkBtn = createButton("AntiAfkBtn", 55, "Anti-AFK: OFF")
+local antiAfkConnection
+local isAntiAfk = false
+
+AntiAfkBtn.MouseButton1Click:Connect(function()
+    isAntiAfk = not isAntiAfk
+    if isAntiAfk then
+        AntiAfkBtn.Text = "Anti-AFK: ON"
+        AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        antiAfkConnection = LocalPlayer.Idled:Connect(function()
+            pcall(function()
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end)
+        end)
+    else
+        AntiAfkBtn.Text = "Anti-AFK: OFF"
+        AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        if antiAfkConnection then
+            antiAfkConnection:Disconnect()
+        end
+    end
+end)
+
+-- 2. Speed Control
+local SpeedBox = Instance.new("TextBox")
+SpeedBox.Size = UDim2.new(0, 150, 0, 35)
+SpeedBox.Position = UDim2.new(0.5, -120, 0, 100)
+SpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBox.TextSize = 14
+SpeedBox.PlaceholderText = "Nhập tốc độ..."
+SpeedBox.Text = "16"
+SpeedBox.Font = Enum.Font.SourceSans
+SpeedBox.Parent = MainFrame
+
+local SpeedBtn = Instance.new("TextButton")
+SpeedBtn.Size = UDim2.new(0, 85, 0, 35)
+SpeedBtn.Position = UDim2.new(0.5, 35, 0, 100)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBtn.TextSize = 14
+SpeedBtn.Text = "Set Speed"
+SpeedBtn.Font = Enum.Font.SourceSans
+SpeedBtn.Parent = MainFrame
+
+SpeedBtn.MouseButton1Click:Connect(function()
+    local speedVal = tonumber(SpeedBox.Text)
+    if speedVal then
+        pcall(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = speedVal
+            end
+        end)
+    end
+end)
+
+-- 3. Fly
+local FlyBtn = createButton("FlyBtn", 145, "Fly: OFF")
+local isFlying = false
+local flyConnection
+
+FlyBtn.MouseButton1Click:Connect(function()
+    isFlying = not isFlying
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local rootPart = char.HumanoidRootPart
+    
+    if isFlying then
+        FlyBtn.Text = "Fly: ON"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "ExecFlyVelocity"
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.Velocity = Vector3.new(0, 0, 0)
+        bv.Parent = rootPart
+        
+        flyConnection = RunService.RenderStepped:Connect(function()
+            if not isFlying then return end
+            pcall(function()
+                local cam = workspace.CurrentCamera
+                local moveDir = Vector3.new()
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+                bv.Velocity = moveDir * 50
+            end)
+        end)
+    else
+        FlyBtn.Text = "Fly: OFF"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        if flyConnection then flyConnection:Disconnect() end
+        if rootPart:FindFirstChild("ExecFlyVelocity") then
+            rootPart.ExecFlyVelocity:Destroy()
+        end
+    end
+end)
+
+-- 4. Auto-Farm Framework
+local AutoFarmBtn = createButton("AutoFarmBtn", 190, "Auto Farm: OFF")
+local isAutoFarm = false
+
+AutoFarmBtn.MouseButton1Click:Connect(function()
+    isAutoFarm = not isAutoFarm
+    if isAutoFarm then
+        AutoFarmBtn.Text = "Auto Farm: ON"
+        AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        
+        task.spawn(function()
+            while isAutoFarm do
+                pcall(function()
+                    -- Chèn logic vòng lặp auto farm tại đây
+                end)
+                task.wait(1)
+            end
+        end)
+    else
+        AutoFarmBtn.Text = "Auto Farm: OFF"
+        AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
