@@ -1,4 +1,4 @@
--- Delta & Xeno Compatible Testing GUI (Fixed Fly/Speed & Full Auto-Farm Loop)
+-- Delta & Xeno Compatible Testing GUI (Stealth Anti-Ban & Fixed Auto Farm)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
@@ -35,7 +35,7 @@ Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
-Title.Text = "Dev Testing Tool (Auto Farm & Fixed)"
+Title.Text = "Dev Testing Tool (Anti-Ban Pro)"
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
@@ -76,14 +76,14 @@ AntiAfkBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. Speed Control (Khóa cứng tốc độ chống bị game reset)
+-- 2. Speed Control (Giới hạn thông minh an toàn tránh quét giá trị lớn như 1000)
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Size = UDim2.new(0, 150, 0, 35)
 SpeedBox.Position = UDim2.new(0.5, -120, 0, 100)
 SpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedBox.TextSize = 14
-SpeedBox.PlaceholderText = "Nhập tốc độ..."
+SpeedBox.PlaceholderText = "Tốc độ (max ~50)..."
 SpeedBox.Text = "16"
 SpeedBox.Font = Enum.Font.SourceSans
 SpeedBox.Parent = MainFrame
@@ -103,6 +103,8 @@ local speedConnection
 SpeedBtn.MouseButton1Click:Connect(function()
     local val = tonumber(SpeedBox.Text)
     if val then
+        -- Chống nhập số quá lớn gây ban ngay lập tức
+        if val > 60 then val = 60 SpeedBox.Text = "60" end
         customSpeed = val
         if speedConnection then speedConnection:Disconnect() end
         speedConnection = RunService.Heartbeat:Connect(function()
@@ -115,7 +117,7 @@ SpeedBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Fly (Khóa vị trí chống giật ngược)
+-- 3. Fly (Chống giật ngược bằng cách đồng bộ hóa Veloity nhẹ nhàng)
 local FlyBtn = createButton("FlyBtn", 145, "Fly: OFF")
 local isFlying = false
 local flyConnection
@@ -132,7 +134,7 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
         
         local bv = Instance.new("BodyVelocity")
-        bv.Name = "StableFlyVelocity"
+        bv.Name = "AntiBanFlyVelocity"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = rootPart
@@ -142,7 +144,7 @@ FlyBtn.MouseButton1Click:Connect(function()
             pcall(function()
                 local moveDir = humanoid.MoveDirection
                 if moveDir.Magnitude > 0 then
-                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 50 + Vector3.new(0, 1.5, 0)
+                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 40 + Vector3.new(0, 1, 0)
                 else
                     bv.Velocity = Vector3.new(0, 0, 0)
                 end
@@ -152,13 +154,13 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.Text = "Fly: OFF"
         FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         if flyConnection then flyConnection:Disconnect() end
-        if rootPart:FindFirstChild("StableFlyVelocity") then
-            rootPart.StableFlyVelocity:Destroy()
+        if rootPart:FindFirstChild("AntiBanFlyVelocity") then
+            rootPart.AntiBanFlyVelocity:Destroy()
         end
     end
 end)
 
--- 4. Auto-Farm (Tự động đi máy chạy bộ + Tự động dịch chuyển/thu thập trứng hiếm Legendary+)
+-- 4. Auto-Farm chuẩn xác (Tự di chuyển đến máy chạy bộ hoặc trứng hiếm mượt mà, hạn chế tele thô)
 local AutoFarmBtn = createButton("AutoFarmBtn", 190, "Auto Farm: OFF")
 local isAutoFarm = false
 
@@ -172,44 +174,42 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
             while isAutoFarm do
                 pcall(function()
                     local char = LocalPlayer.Character
-                    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                    if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
                     local rootPart = char.HumanoidRootPart
+                    local humanoid = char.Humanoid
                     
-                    -- Ưu tiên 1: Tìm các quả trứng hiếm (Legendary/Mythical/Secret) trong map để tele đến thu thập
-                    local targetEgg = nil
+                    -- Ưu tiên 1: Tìm trứng hiếm (Legendary trở lên)
+                    local targetObj = nil
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
                             local rarity = tostring(obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""):lower()
                             if rarity:find("legendary") or rarity:find("mythical") or rarity:find("secret") or obj:FindFirstChild("Legendary") then
                                 if obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") then
-                                    targetEgg = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                    targetObj = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
                                     break
                                 end
                             end
                         end
                     end
                     
-                    if targetEgg then
-                        rootPart.CFrame = targetEgg.CFrame + Vector3.new(0, 3, 0)
-                        task.wait(1)
-                    else
-                        -- Ưu tiên 2: Nếu không có trứng hiếm, tự động tìm máy chạy bộ (Treadmill) để luyện tập mạch
-                        local treadmill = nil
+                    -- Ưu tiên 2: Nếu không có trứng hiếm, tìm máy chạy bộ (Treadmill) để tự chạy mạch
+                    if not targetObj then
                         for _, obj in pairs(workspace:GetDescendants()) do
                             if obj:IsA("Model") and (string.find(string.lower(obj.Name), "treadmill") or string.find(string.lower(obj.Name), "run") or string.find(string.lower(obj.Name), "machine")) then
                                 if obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") then
-                                    treadmill = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                    targetObj = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
                                     break
                                 end
                             end
                         end
-                        
-                        if treadmill then
-                            rootPart.CFrame = treadmill.CFrame + Vector3.new(0, 3, 0)
-                        end
+                    end
+                    
+                    -- Di chuyển mượt bằng lệnh WalkTo thay vì đổi CFrame đột ngột để tránh bị Anti-Cheat quét vị trí phi vật lý
+                    if targetObj then
+                        humanoid:MoveTo(targetObj.Position)
                     end
                 end)
-                task.wait(2)
+                task.wait(1.5)
             end
         end)
     else
@@ -246,7 +246,7 @@ EspEggBtn.MouseButton1Click:Connect(function()
                         end
                     end
                 end)
-                task.wait(2)
+                task.wait(3)
             end
         end)
     else
@@ -283,7 +283,7 @@ EspPlayerBtn.MouseButton1Click:Connect(function()
                         end
                     end
                 end)
-                task.wait(2)
+                task.wait(3)
             end
         end)
     else
