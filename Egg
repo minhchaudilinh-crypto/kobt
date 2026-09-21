@@ -1,7 +1,6 @@
--- Delta & Xeno Compatible Testing GUI + ESP (Eggs & Players)
+-- Delta & Xeno Compatible Testing GUI (Fixed Speed & Native Movement Fly)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 local TeleportService = game:GetService("TeleportService")
 local CoreGui = game:GetService("CoreGui")
@@ -16,13 +15,11 @@ if guiParent:FindFirstChild("DevTestingPanel") then
     guiParent.DevTestingPanel:Destroy()
 end
 
--- Tạo ScreenGui chính
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DevTestingPanel"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = guiParent
 
--- Khung chính (Main Frame) - Mở rộng kích thước để chứa thêm nút
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 280, 0, 440)
@@ -33,17 +30,15 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- Tiêu đề
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
-Title.Text = "Dev Testing Tool (ESP & Features)"
+Title.Text = "Dev Testing Tool (Fixed Speed & Fly)"
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
--- Hàm tạo nút bấm
 local function createButton(name, posY, text)
     local btn = Instance.new("TextButton")
     btn.Name = name
@@ -81,7 +76,7 @@ AntiAfkBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. Speed Control
+-- 2. Speed Control (Đã sửa lại logic cập nhật trực tiếp vào Humanoid và CharacterAdded để giữ speed khi hồi sinh)
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Size = UDim2.new(0, 150, 0, 35)
 SpeedBox.Position = UDim2.new(0.5, -120, 0, 100)
@@ -103,18 +98,29 @@ SpeedBtn.Text = "Set Speed"
 SpeedBtn.Font = Enum.Font.SourceSans
 SpeedBtn.Parent = MainFrame
 
+local currentSpeed = 16
 SpeedBtn.MouseButton1Click:Connect(function()
     local speedVal = tonumber(SpeedBox.Text)
     if speedVal then
+        currentSpeed = speedVal
         pcall(function()
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                LocalPlayer.Character.Humanoid.WalkSpeed = speedVal
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = currentSpeed
             end
         end)
     end
 end)
 
--- 3. Fly
+-- Tự động áp dụng lại Speed khi nhân vật chết và hồi sinh
+LocalPlayer.CharacterAdded:Connect(function(char)
+    local humanoid = char:WaitForChild("Humanoid", 5)
+    if humanoid then
+        humanoid.WalkSpeed = currentSpeed
+    end
+end)
+
+-- 3. Fly (Sử dụng trực tiếp Humanoid.MoveDirection để tương thích hoàn toàn với nút di chuyển Roblox / Joystick mobile)
 local FlyBtn = createButton("FlyBtn", 145, "Fly: OFF")
 local isFlying = false
 local flyConnection
@@ -122,8 +128,9 @@ local flyConnection
 FlyBtn.MouseButton1Click:Connect(function()
     isFlying = not isFlying
     local char = LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
     local rootPart = char.HumanoidRootPart
+    local humanoid = char.Humanoid
     
     if isFlying then
         FlyBtn.Text = "Fly: ON"
@@ -135,16 +142,20 @@ FlyBtn.MouseButton1Click:Connect(function()
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = rootPart
         
+        -- Vô hiệu hóa trọng lực bằng cách tắt trạng thái ngã hoặc dùng PlatformStand nhẹ nếu cần
         flyConnection = RunService.RenderStepped:Connect(function()
             if not isFlying then return end
             pcall(function()
                 local cam = workspace.CurrentCamera
-                local moveDir = Vector3.new()
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
-                bv.Velocity = moveDir * 50
+                -- Lấy hướng di chuyển trực tiếp từ bàn phím / joystick của Roblox (Humanoid.MoveDirection)
+                local moveDir = humanoid.MoveDirection
+                
+                -- Nếu nhân vật đang bấm nút di chuyển, bay theo hướng camera kết hợp nút điều hướng
+                if moveDir.Magnitude > 0 then
+                    bv.Velocity = (cam.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 50 + Vector3.new(0, 2, 0)
+                else
+                    bv.Velocity = Vector3.new(0, 0, 0) -- Đứng yên lơ lửng khi không bấm di chuyển
+                end
             end)
         end)
     else
@@ -171,7 +182,7 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
                 pcall(function()
                     -- Logic auto farm
                 end)
-                task.wait(1.5)
+                task.wait(3)
             end
         end)
     else
@@ -189,10 +200,32 @@ EspEggBtn.MouseButton1Click:Connect(function()
     if isEspEgg then
         EspEggBtn.Text = "ESP Trứng (Legend+): ON"
         EspEggBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        task.spawn(function()
+            while isEspEgg do
+                pcall(function()
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
+                            local rarity = obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""
+                            local lowerRarity = string.lower(tostring(rarity))
+                            if string.find(lowerRarity, "legendary") or string.find(lowerRarity, "mythical") or string.find(lowerRarity, "secret") or obj:FindFirstChild("Legendary") then
+                                if not obj:FindFirstChild("EggHighlight") then
+                                    local hl = Instance.new("Highlight")
+                                    hl.Name = "EggHighlight"
+                                    hl.Adornee = obj
+                                    hl.FillColor = Color3.fromRGB(255, 215, 0)
+                                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                    hl.Parent = obj
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(2)
+            end
+        end)
     else
         EspEggBtn.Text = "ESP Trứng (Legend+): OFF"
         EspEggBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        -- Dọn dẹp highlight cũ nếu có
         for _, v in pairs(workspace:GetDescendants()) do
             if v.Name == "EggHighlight" then v:Destroy() end
         end
@@ -208,6 +241,25 @@ EspPlayerBtn.MouseButton1Click:Connect(function()
     if isEspPlayer then
         EspPlayerBtn.Text = "ESP Player: ON"
         EspPlayerBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        task.spawn(function()
+            while isEspPlayer do
+                pcall(function()
+                    for _, player in pairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character then
+                            if not player.Character:FindFirstChild("PlayerHighlight") then
+                                local hl = Instance.new("Highlight")
+                                hl.Name = "PlayerHighlight"
+                                hl.Adornee = player.Character
+                                hl.FillColor = Color3.fromRGB(255, 0, 0)
+                                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                                hl.Parent = player.Character
+                            end
+                        end
+                    end
+                end)
+                task.wait(2)
+            end
+        end)
     else
         EspPlayerBtn.Text = "ESP Player: OFF"
         EspPlayerBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -234,53 +286,6 @@ AutoRejoinBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Vòng lặp cập nhật ESP thời gian thực
-RunService.RenderStepped:Connect(function()
-    -- Xử lý ESP Trứng (Lọc các độ hiếm cao: Legendary, Mythical, Secret,...)
-    if isEspEgg then
-        pcall(function()
-            for _, obj in pairs(workspace:GetDescendants()) do
-                -- Kiểm tra tên hoặc thuộc tính liên quan đến "Egg" và phân loại độ hiếm
-                if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
-                    local rarity = obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""
-                    local lowerRarity = string.lower(tostring(rarity))
-                    
-                    -- Lọc các bậc từ Legendary trở lên
-                    if string.find(lowerRarity, "legendary") or string.find(lowerRarity, "mythical") or string.find(lowerRarity, "secret") or obj:FindFirstChild("Legendary") then
-                        if not obj:FindFirstChild("EggHighlight") then
-                            local hl = Instance.new("Highlight")
-                            hl.Name = "EggHighlight"
-                            hl.Adornee = obj
-                            hl.FillColor = Color3.fromRGB(255, 215, 0) -- Màu vàng cho đồ hiếm
-                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                            hl.Parent = obj
-                        end
-                    end
-                end
-            end
-        end)
-    end
-
-    -- Xử lý ESP Player
-    if isEspPlayer then
-        pcall(function()
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character then
-                    if not player.Character:FindFirstChild("PlayerHighlight") then
-                        local hl = Instance.new("Highlight")
-                        hl.Name = "PlayerHighlight"
-                        hl.Adornee = player.Character
-                        hl.FillColor = Color3.fromRGB(255, 0, 0) -- Màu đỏ cho người chơi khác
-                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        hl.Parent = player.Character
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- Lắng nghe sự kiện bị kick / mất kết nối để Auto Rejoin
 CoreGui.PromptMessageArea.ChildAdded:Connect(function()
     if isAutoRejoin then
         task.wait(1)
