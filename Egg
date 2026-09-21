@@ -1,4 +1,4 @@
--- Delta & Xeno Compatible Testing GUI (Fixed Speed & Native Movement Fly)
+-- Delta & Xeno Compatible Testing GUI (Fixed Fly/Speed & Full Auto-Farm Loop)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
@@ -35,7 +35,7 @@ Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
-Title.Text = "Dev Testing Tool (Fixed Speed & Fly)"
+Title.Text = "Dev Testing Tool (Auto Farm & Fixed)"
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
@@ -76,7 +76,7 @@ AntiAfkBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. Speed Control (Đã sửa lại logic cập nhật trực tiếp vào Humanoid và CharacterAdded để giữ speed khi hồi sinh)
+-- 2. Speed Control (Khóa cứng tốc độ chống bị game reset)
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Size = UDim2.new(0, 150, 0, 35)
 SpeedBox.Position = UDim2.new(0.5, -120, 0, 100)
@@ -98,29 +98,24 @@ SpeedBtn.Text = "Set Speed"
 SpeedBtn.Font = Enum.Font.SourceSans
 SpeedBtn.Parent = MainFrame
 
-local currentSpeed = 16
+local customSpeed = 16
+local speedConnection
 SpeedBtn.MouseButton1Click:Connect(function()
-    local speedVal = tonumber(SpeedBox.Text)
-    if speedVal then
-        currentSpeed = speedVal
-        pcall(function()
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = currentSpeed
-            end
+    local val = tonumber(SpeedBox.Text)
+    if val then
+        customSpeed = val
+        if speedConnection then speedConnection:Disconnect() end
+        speedConnection = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                    LocalPlayer.Character.Humanoid.WalkSpeed = customSpeed
+                end
+            end)
         end)
     end
 end)
 
--- Tự động áp dụng lại Speed khi nhân vật chết và hồi sinh
-LocalPlayer.CharacterAdded:Connect(function(char)
-    local humanoid = char:WaitForChild("Humanoid", 5)
-    if humanoid then
-        humanoid.WalkSpeed = currentSpeed
-    end
-end)
-
--- 3. Fly (Sử dụng trực tiếp Humanoid.MoveDirection để tương thích hoàn toàn với nút di chuyển Roblox / Joystick mobile)
+-- 3. Fly (Khóa vị trí chống giật ngược)
 local FlyBtn = createButton("FlyBtn", 145, "Fly: OFF")
 local isFlying = false
 local flyConnection
@@ -137,24 +132,19 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
         
         local bv = Instance.new("BodyVelocity")
-        bv.Name = "ExecFlyVelocity"
+        bv.Name = "StableFlyVelocity"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = rootPart
         
-        -- Vô hiệu hóa trọng lực bằng cách tắt trạng thái ngã hoặc dùng PlatformStand nhẹ nếu cần
         flyConnection = RunService.RenderStepped:Connect(function()
             if not isFlying then return end
             pcall(function()
-                local cam = workspace.CurrentCamera
-                -- Lấy hướng di chuyển trực tiếp từ bàn phím / joystick của Roblox (Humanoid.MoveDirection)
                 local moveDir = humanoid.MoveDirection
-                
-                -- Nếu nhân vật đang bấm nút di chuyển, bay theo hướng camera kết hợp nút điều hướng
                 if moveDir.Magnitude > 0 then
-                    bv.Velocity = (cam.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 50 + Vector3.new(0, 2, 0)
+                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 50 + Vector3.new(0, 1.5, 0)
                 else
-                    bv.Velocity = Vector3.new(0, 0, 0) -- Đứng yên lơ lửng khi không bấm di chuyển
+                    bv.Velocity = Vector3.new(0, 0, 0)
                 end
             end)
         end)
@@ -162,13 +152,13 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.Text = "Fly: OFF"
         FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         if flyConnection then flyConnection:Disconnect() end
-        if rootPart:FindFirstChild("ExecFlyVelocity") then
-            rootPart.ExecFlyVelocity:Destroy()
+        if rootPart:FindFirstChild("StableFlyVelocity") then
+            rootPart.StableFlyVelocity:Destroy()
         end
     end
 end)
 
--- 4. Auto-Farm Framework
+-- 4. Auto-Farm (Tự động đi máy chạy bộ + Tự động dịch chuyển/thu thập trứng hiếm Legendary+)
 local AutoFarmBtn = createButton("AutoFarmBtn", 190, "Auto Farm: OFF")
 local isAutoFarm = false
 
@@ -177,12 +167,49 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
     if isAutoFarm then
         AutoFarmBtn.Text = "Auto Farm: ON"
         AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        
         task.spawn(function()
             while isAutoFarm do
                 pcall(function()
-                    -- Logic auto farm
+                    local char = LocalPlayer.Character
+                    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                    local rootPart = char.HumanoidRootPart
+                    
+                    -- Ưu tiên 1: Tìm các quả trứng hiếm (Legendary/Mythical/Secret) trong map để tele đến thu thập
+                    local targetEgg = nil
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
+                            local rarity = tostring(obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""):lower()
+                            if rarity:find("legendary") or rarity:find("mythical") or rarity:find("secret") or obj:FindFirstChild("Legendary") then
+                                if obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") then
+                                    targetEgg = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    
+                    if targetEgg then
+                        rootPart.CFrame = targetEgg.CFrame + Vector3.new(0, 3, 0)
+                        task.wait(1)
+                    else
+                        -- Ưu tiên 2: Nếu không có trứng hiếm, tự động tìm máy chạy bộ (Treadmill) để luyện tập mạch
+                        local treadmill = nil
+                        for _, obj in pairs(workspace:GetDescendants()) do
+                            if obj:IsA("Model") and (string.find(string.lower(obj.Name), "treadmill") or string.find(string.lower(obj.Name), "run") or string.find(string.lower(obj.Name), "machine")) then
+                                if obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") then
+                                    treadmill = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                    break
+                                end
+                            end
+                        end
+                        
+                        if treadmill then
+                            rootPart.CFrame = treadmill.CFrame + Vector3.new(0, 3, 0)
+                        end
+                    end
                 end)
-                task.wait(3)
+                task.wait(2)
             end
         end)
     else
@@ -191,7 +218,7 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. ESP Trứng (Legendary trở lên)
+-- 5. ESP Trứng
 local EspEggBtn = createButton("EspEggBtn", 235, "ESP Trứng (Legend+): OFF")
 local isEspEgg = false
 
@@ -205,9 +232,8 @@ EspEggBtn.MouseButton1Click:Connect(function()
                 pcall(function()
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
-                            local rarity = obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""
-                            local lowerRarity = string.lower(tostring(rarity))
-                            if string.find(lowerRarity, "legendary") or string.find(lowerRarity, "mythical") or string.find(lowerRarity, "secret") or obj:FindFirstChild("Legendary") then
+                            local rarity = string.lower(tostring(obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""))
+                            if rarity:find("legendary") or rarity:find("mythical") or rarity:find("secret") or obj:FindFirstChild("Legendary") then
                                 if not obj:FindFirstChild("EggHighlight") then
                                     local hl = Instance.new("Highlight")
                                     hl.Name = "EggHighlight"
@@ -232,7 +258,7 @@ EspEggBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 6. ESP Người chơi
+-- 6. ESP Player
 local EspPlayerBtn = createButton("EspPlayerBtn", 280, "ESP Player: OFF")
 local isEspPlayer = false
 
