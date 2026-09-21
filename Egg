@@ -1,4 +1,4 @@
--- Delta & Xeno Compatible - Micro-Step Speed & Bypass Rubberband
+-- Ultimate Delta & Xeno Testing Script (Stable & Working)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
@@ -11,20 +11,20 @@ local Camera = workspace.CurrentCamera
 
 local guiParent = pcall(function() return gethui() end) and gethui() or PlayerGui
 
-if guiParent:FindFirstChild("DevTestingPanelBypass") then
-    guiParent.DevTestingPanelBypass:Destroy()
+if guiParent:FindFirstChild("UltimateTestingGUI") then
+    guiParent.UltimateTestingGUI:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DevTestingPanelBypass"
+ScreenGui.Name = "UltimateTestingGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = guiParent
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 280, 0, 440)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -220)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Size = UDim2.new(0, 280, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -32,19 +32,19 @@ MainFrame.Parent = ScreenGui
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 15
-Title.Text = "Micro-Step Speed (No Rubberband)"
+Title.Text = "Fixed Script Panel (Delta/Xeno)"
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
 local function createButton(name, posY, text)
     local btn = Instance.new("TextButton")
     btn.Name = name
-    btn.Size = UDim2.new(0, 240, 0, 35)
+    btn.Size = UDim2.new(0, 240, 0, 32)
     btn.Position = UDim2.new(0.5, -120, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.TextSize = 14
     btn.Text = text
@@ -54,16 +54,16 @@ local function createButton(name, posY, text)
 end
 
 -- 1. Anti-AFK
-local AntiAfkBtn = createButton("AntiAfkBtn", 55, "Anti-AFK: OFF")
-local antiAfkConnection
+local AntiAfkBtn = createButton("AntiAfkBtn", 50, "Anti-AFK: OFF")
 local isAntiAfk = false
+local afkConn
 
 AntiAfkBtn.MouseButton1Click:Connect(function()
     isAntiAfk = not isAntiAfk
     if isAntiAfk then
         AntiAfkBtn.Text = "Anti-AFK: ON"
         AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        antiAfkConnection = LocalPlayer.Idled:Connect(function()
+        afkConn = LocalPlayer.Idled:Connect(function()
             pcall(function()
                 VirtualUser:CaptureController()
                 VirtualUser:ClickButton2(Vector2.new())
@@ -71,62 +71,54 @@ AntiAfkBtn.MouseButton1Click:Connect(function()
         end)
     else
         AntiAfkBtn.Text = "Anti-AFK: OFF"
-        AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        if antiAfkConnection then antiAfkConnection:Disconnect() end
+        AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        if afkConn then afkConn:Disconnect() end
     end
 end)
 
--- 2. Micro-Step Speed Control (Bypass Server Check bằng cách tịnh tiến tọa độ liên tục)
+-- 2. Speed Control (Dùng Heartbeat ổn định WalkSpeed)
 local SpeedBox = Instance.new("TextBox")
-SpeedBox.Size = UDim2.new(0, 150, 0, 35)
-SpeedBox.Position = UDim2.new(0.5, -120, 0, 100)
-SpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedBox.Size = UDim2.new(0, 140, 0, 32)
+SpeedBox.Position = UDim2.new(0.5, -120, 0, 90)
+SpeedBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedBox.TextSize = 14
-SpeedBox.PlaceholderText = "Nhập tốc độ tùy ý..."
-SpeedBox.Text = "50"
+SpeedBox.PlaceholderText = "Tốc độ..."
+SpeedBox.Text = "30"
 SpeedBox.Font = Enum.Font.SourceSans
 SpeedBox.Parent = MainFrame
 
 local SpeedBtn = Instance.new("TextButton")
-SpeedBtn.Size = UDim2.new(0, 85, 0, 35)
-SpeedBtn.Position = UDim2.new(0.5, 35, 0, 100)
-SpeedBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+SpeedBtn.Size = UDim2.new(0, 95, 0, 32)
+SpeedBtn.Position = UDim2.new(0.5, 25, 0, 90)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedBtn.TextSize = 14
 SpeedBtn.Text = "Set Speed"
 SpeedBtn.Font = Enum.Font.SourceSans
 SpeedBtn.Parent = MainFrame
 
-local customSpeed = 50
-local speedConnection
+local speedVal = 30
+local speedLoop = nil
 SpeedBtn.MouseButton1Click:Connect(function()
     local val = tonumber(SpeedBox.Text)
     if val then
-        customSpeed = val
-        if speedConnection then speedConnection:Disconnect() end
-        
-        -- Dùng RenderStepped dịch chuyển vi mô (Micro-Step) để lừa hệ thống kiểm tra khoảng cách của server
-        speedConnection = RunService.RenderStepped:Connect(function(dt)
+        speedVal = val
+        if speedLoop then speedLoop:Disconnect() end
+        speedLoop = RunService.Heartbeat:Connect(function()
             pcall(function()
-                local char = LocalPlayer.Character
-                if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
-                local humanoid = char.Humanoid
-                local rootPart = char.HumanoidRootPart
-                
-                if humanoid.MoveDirection.Magnitude > 0 then
-                    local offset = humanoid.MoveDirection * (customSpeed * dt)
-                    rootPart.CFrame = rootPart.CFrame + offset
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                    LocalPlayer.Character.Humanoid.WalkSpeed = speedVal
                 end
             end)
         end)
     end
 end)
 
--- 3. Fly (Khóa vị trí siêu mượt không bị giật ngược)
-local FlyBtn = createButton("FlyBtn", 145, "Fly: OFF")
+-- 3. Fly (Điều khiển bằng nút di chuyển Roblox / Joystick)
+local FlyBtn = createButton("FlyBtn", 130, "Fly: OFF")
 local isFlying = false
-local flyConnection
+local flyConn
 
 FlyBtn.MouseButton1Click:Connect(function()
     isFlying = not isFlying
@@ -140,17 +132,17 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
         
         local bv = Instance.new("BodyVelocity")
-        bv.Name = "BypassFlyVelocity"
+        bv.Name = "FixFlyVel"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = rootPart
         
-        flyConnection = RunService.RenderStepped:Connect(function()
+        flyConn = RunService.RenderStepped:Connect(function()
             if not isFlying then return end
             pcall(function()
                 local moveDir = humanoid.MoveDirection
                 if moveDir.Magnitude > 0 then
-                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 70 + Vector3.new(0, 1.2, 0)
+                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 45 + Vector3.new(0, 1, 0)
                 else
                     bv.Velocity = Vector3.new(0, 0, 0)
                 end
@@ -158,16 +150,16 @@ FlyBtn.MouseButton1Click:Connect(function()
         end)
     else
         FlyBtn.Text = "Fly: OFF"
-        FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        if flyConnection then flyConnection:Disconnect() end
-        if rootPart:FindFirstChild("BypassFlyVelocity") then
-            rootPart.BypassFlyVelocity:Destroy()
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        if flyConn then flyConn:Disconnect() end
+        if rootPart:FindFirstChild("FixFlyVel") then
+            rootPart.FixFlyVel:Destroy()
         end
     end
 end)
 
--- 4. Auto-Farm
-local AutoFarmBtn = createButton("AutoFarmBtn", 190, "Auto Farm: OFF")
+-- 4. Auto Farm (Tự động đi máy chạy bộ và thu thập trứng Legendary+)
+local AutoFarmBtn = createButton("AutoFarmBtn", 170, "Auto Farm: OFF")
 local isAutoFarm = false
 
 AutoFarmBtn.MouseButton1Click:Connect(function()
@@ -183,45 +175,47 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
                     if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
                     local humanoid = char.Humanoid
                     
-                    local targetObj = nil
+                    local target = nil
+                    -- Tìm trứng độ hiếm cao (Legendary+)
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
                             local rarity = tostring(obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""):lower()
                             if rarity:find("legendary") or rarity:find("mythical") or rarity:find("secret") or obj:FindFirstChild("Legendary") then
                                 if obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") then
-                                    targetObj = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                    target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
                                     break
                                 end
                             end
                         end
                     end
                     
-                    if not targetObj then
+                    -- Nếu không có trứng hiếm, tìm máy chạy bộ (Treadmill)
+                    if not target then
                         for _, obj in pairs(workspace:GetDescendants()) do
-                            if obj:IsA("Model") and (string.find(string.lower(obj.Name), "treadmill") or string.find(string.lower(obj.Name), "run") or string.find(string.lower(obj.Name), "machine")) then
+                            if obj:IsA("Model") and (string.find(string.lower(obj.Name), "treadmill") or string.find(string.lower(obj.Name), "machine")) then
                                 if obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart") then
-                                    targetObj = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                                    target = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
                                     break
                                 end
                             end
                         end
                     end
                     
-                    if targetObj then
-                        humanoid:MoveTo(targetObj.Position)
+                    if target then
+                        humanoid:MoveTo(target.Position)
                     end
                 end)
-                task.wait(1.5)
+                task.wait(2)
             end
         end)
     else
         AutoFarmBtn.Text = "Auto Farm: OFF"
-        AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     end
 end)
 
--- 5. ESP Trứng
-local EspEggBtn = createButton("EspEggBtn", 235, "ESP Trứng (Legend+): OFF")
+-- 5. ESP Trứng (Legendary trở lên)
+local EspEggBtn = createButton("EspEggBtn", 210, "ESP Trứng (Legend+): OFF")
 local isEspEgg = false
 
 EspEggBtn.MouseButton1Click:Connect(function()
@@ -253,15 +247,15 @@ EspEggBtn.MouseButton1Click:Connect(function()
         end)
     else
         EspEggBtn.Text = "ESP Trứng (Legend+): OFF"
-        EspEggBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        EspEggBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         for _, v in pairs(workspace:GetDescendants()) do
             if v.Name == "EggHighlight" then v:Destroy() end
         end
     end
 end)
 
--- 6. ESP Player
-local EspPlayerBtn = createButton("EspPlayerBtn", 280, "ESP Player: OFF")
+-- 6. ESP Người chơi
+local EspPlayerBtn = createButton("EspPlayerBtn", 250, "ESP Player: OFF")
 local isEspPlayer = false
 
 EspPlayerBtn.MouseButton1Click:Connect(function()
@@ -290,7 +284,7 @@ EspPlayerBtn.MouseButton1Click:Connect(function()
         end)
     else
         EspPlayerBtn.Text = "ESP Player: OFF"
-        EspPlayerBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        EspPlayerBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         for _, p in pairs(Players:GetPlayers()) do
             if p.Character and p.Character:FindFirstChild("PlayerHighlight") then
                 p.Character.PlayerHighlight:Destroy()
@@ -300,7 +294,7 @@ EspPlayerBtn.MouseButton1Click:Connect(function()
 end)
 
 -- 7. Auto Rejoin
-local AutoRejoinBtn = createButton("AutoRejoinBtn", 325, "Auto Rejoin: OFF")
+local AutoRejoinBtn = createButton("AutoRejoinBtn", 290, "Auto Rejoin: OFF")
 local isAutoRejoin = false
 
 AutoRejoinBtn.MouseButton1Click:Connect(function()
@@ -310,7 +304,7 @@ AutoRejoinBtn.MouseButton1Click:Connect(function()
         AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
     else
         AutoRejoinBtn.Text = "Auto Rejoin: OFF"
-        AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     end
 end)
 
