@@ -1,4 +1,4 @@
--- Delta & Xeno Compatible Testing GUI (Stealth Anti-Ban & Fixed Auto Farm)
+-- Delta & Xeno Compatible - Uncapped Speed & Anti-Rubberband (Teleport Back Fix)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local VirtualUser = game:GetService("VirtualUser")
@@ -11,12 +11,12 @@ local Camera = workspace.CurrentCamera
 
 local guiParent = pcall(function() return gethui() end) and gethui() or PlayerGui
 
-if guiParent:FindFirstChild("DevTestingPanel") then
-    guiParent.DevTestingPanel:Destroy()
+if guiParent:FindFirstChild("DevTestingPanelUncapped") then
+    guiParent.DevTestingPanelUncapped:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DevTestingPanel"
+ScreenGui.Name = "DevTestingPanelUncapped"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = guiParent
 
@@ -34,8 +34,8 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
-Title.Text = "Dev Testing Tool (Anti-Ban Pro)"
+Title.TextSize = 15
+Title.Text = "Uncapped Speed & Anti-Rubberband"
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
@@ -76,15 +76,15 @@ AntiAfkBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 2. Speed Control (Giới hạn thông minh an toàn tránh quét giá trị lớn như 1000)
+-- 2. Uncapped Speed Control (Phá giới hạn tốc độ hoàn toàn bằng Vector Force / CFrame Velocity mở rộng)
 local SpeedBox = Instance.new("TextBox")
 SpeedBox.Size = UDim2.new(0, 150, 0, 35)
 SpeedBox.Position = UDim2.new(0.5, -120, 0, 100)
 SpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedBox.TextSize = 14
-SpeedBox.PlaceholderText = "Tốc độ (max ~50)..."
-SpeedBox.Text = "16"
+SpeedBox.PlaceholderText = "Nhập tốc độ tùy ý..."
+SpeedBox.Text = "100"
 SpeedBox.Font = Enum.Font.SourceSans
 SpeedBox.Parent = MainFrame
 
@@ -103,21 +103,33 @@ local speedConnection
 SpeedBtn.MouseButton1Click:Connect(function()
     local val = tonumber(SpeedBox.Text)
     if val then
-        -- Chống nhập số quá lớn gây ban ngay lập tức
-        if val > 60 then val = 60 SpeedBox.Text = "60" end
         customSpeed = val
         if speedConnection then speedConnection:Disconnect() end
-        speedConnection = RunService.Heartbeat:Connect(function()
+        
+        -- Dùng Heartbeat liên tục đẩy trực tiếp gia tốc HumanoidRootPart để bypass giới hạn WalkSpeed gốc của game
+        speedConnection = RunService.Heartbeat:Connect(function(dt)
             pcall(function()
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-                    LocalPlayer.Character.Humanoid.WalkSpeed = customSpeed
+                local char = LocalPlayer.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
+                local humanoid = char.Humanoid
+                local rootPart = char.HumanoidRootPart
+                
+                humanoid.WalkSpeed = customSpeed -- Vẫn ép WalkSpeed
+                
+                -- Nếu nhân vật đang di chuyển, cộng dồn vận tốc theo hướng di chuyển để không bị server rollback/tp lại
+                if humanoid.MoveDirection.Magnitude > 0 then
+                    rootPart.AssemblyLinearVelocity = Vector3.new(
+                        humanoid.MoveDirection.X * customSpeed,
+                        rootPart.AssemblyLinearVelocity.Y,
+                        humanoid.MoveDirection.Z * customSpeed
+                    )
                 end
             end)
         end)
     end
 end)
 
--- 3. Fly (Chống giật ngược bằng cách đồng bộ hóa Veloity nhẹ nhàng)
+-- 3. Fly (Chống giật ngược triệt để)
 local FlyBtn = createButton("FlyBtn", 145, "Fly: OFF")
 local isFlying = false
 local flyConnection
@@ -134,7 +146,7 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
         
         local bv = Instance.new("BodyVelocity")
-        bv.Name = "AntiBanFlyVelocity"
+        bv.Name = "UncappedFlyVelocity"
         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = rootPart
@@ -144,7 +156,7 @@ FlyBtn.MouseButton1Click:Connect(function()
             pcall(function()
                 local moveDir = humanoid.MoveDirection
                 if moveDir.Magnitude > 0 then
-                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 40 + Vector3.new(0, 1, 0)
+                    bv.Velocity = (Camera.CFrame.LookVector * Vector3.new(1,0,1)).Unit * moveDir.Magnitude * 60 + Vector3.new(0, 1.2, 0)
                 else
                     bv.Velocity = Vector3.new(0, 0, 0)
                 end
@@ -154,13 +166,13 @@ FlyBtn.MouseButton1Click:Connect(function()
         FlyBtn.Text = "Fly: OFF"
         FlyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         if flyConnection then flyConnection:Disconnect() end
-        if rootPart:FindFirstChild("AntiBanFlyVelocity") then
-            rootPart.AntiBanFlyVelocity:Destroy()
+        if rootPart:FindFirstChild("UncappedFlyVelocity") then
+            rootPart.UncappedFlyVelocity:Destroy()
         end
     end
 end)
 
--- 4. Auto-Farm chuẩn xác (Tự di chuyển đến máy chạy bộ hoặc trứng hiếm mượt mà, hạn chế tele thô)
+-- 4. Auto-Farm (Tự động di chuyển mượt bằng lệnh đi bộ để tránh bị quét lỗi dịch chuyển)
 local AutoFarmBtn = createButton("AutoFarmBtn", 190, "Auto Farm: OFF")
 local isAutoFarm = false
 
@@ -175,10 +187,8 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
                 pcall(function()
                     local char = LocalPlayer.Character
                     if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
-                    local rootPart = char.HumanoidRootPart
                     local humanoid = char.Humanoid
                     
-                    -- Ưu tiên 1: Tìm trứng hiếm (Legendary trở lên)
                     local targetObj = nil
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
@@ -192,7 +202,6 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
                         end
                     end
                     
-                    -- Ưu tiên 2: Nếu không có trứng hiếm, tìm máy chạy bộ (Treadmill) để tự chạy mạch
                     if not targetObj then
                         for _, obj in pairs(workspace:GetDescendants()) do
                             if obj:IsA("Model") and (string.find(string.lower(obj.Name), "treadmill") or string.find(string.lower(obj.Name), "run") or string.find(string.lower(obj.Name), "machine")) then
@@ -204,7 +213,6 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
                         end
                     end
                     
-                    -- Di chuyển mượt bằng lệnh WalkTo thay vì đổi CFrame đột ngột để tránh bị Anti-Cheat quét vị trí phi vật lý
                     if targetObj then
                         humanoid:MoveTo(targetObj.Position)
                     end
