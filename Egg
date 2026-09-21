@@ -1,28 +1,32 @@
--- Delta & Xeno Compatible Testing GUI
+-- Delta & Xeno Compatible Testing GUI + ESP (Eggs & Players)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
+local TeleportService = game:GetService("TeleportService")
+local CoreGui = game:GetService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Camera = workspace.CurrentCamera
 
--- Xóa GUI cũ nếu đã tồn tại để tránh trùng lặp
-if PlayerGui:FindFirstChild("DevTestingPanel") then
-    PlayerGui.DevTestingPanel:Destroy()
+local guiParent = pcall(function() return gethui() end) and gethui() or PlayerGui
+
+if guiParent:FindFirstChild("DevTestingPanel") then
+    guiParent.DevTestingPanel:Destroy()
 end
 
 -- Tạo ScreenGui chính
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DevTestingPanel"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
+ScreenGui.Parent = guiParent
 
--- Khung chính (Main Frame)
+-- Khung chính (Main Frame) - Mở rộng kích thước để chứa thêm nút
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 280, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -160)
+MainFrame.Size = UDim2.new(0, 280, 0, 440)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -220)
 MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -35,11 +39,11 @@ Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
-Title.Text = "Dev Testing Tool (Multi-Exec)"
+Title.Text = "Dev Testing Tool (ESP & Features)"
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
 
--- Hàm tạo nút bấm (Button)
+-- Hàm tạo nút bấm
 local function createButton(name, posY, text)
     local btn = Instance.new("TextButton")
     btn.Name = name
@@ -73,9 +77,7 @@ AntiAfkBtn.MouseButton1Click:Connect(function()
     else
         AntiAfkBtn.Text = "Anti-AFK: OFF"
         AntiAfkBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        if antiAfkConnection then
-            antiAfkConnection:Disconnect()
-        end
+        if antiAfkConnection then antiAfkConnection:Disconnect() end
     end
 end)
 
@@ -164,17 +166,126 @@ AutoFarmBtn.MouseButton1Click:Connect(function()
     if isAutoFarm then
         AutoFarmBtn.Text = "Auto Farm: ON"
         AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        
         task.spawn(function()
             while isAutoFarm do
                 pcall(function()
-                    -- Chèn logic vòng lặp auto farm tại đây
+                    -- Logic auto farm
                 end)
-                task.wait(1)
+                task.wait(1.5)
             end
         end)
     else
         AutoFarmBtn.Text = "Auto Farm: OFF"
         AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
+
+-- 5. ESP Trứng (Legendary trở lên)
+local EspEggBtn = createButton("EspEggBtn", 235, "ESP Trứng (Legend+): OFF")
+local isEspEgg = false
+
+EspEggBtn.MouseButton1Click:Connect(function()
+    isEspEgg = not isEspEgg
+    if isEspEgg then
+        EspEggBtn.Text = "ESP Trứng (Legend+): ON"
+        EspEggBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    else
+        EspEggBtn.Text = "ESP Trứng (Legend+): OFF"
+        EspEggBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        -- Dọn dẹp highlight cũ nếu có
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "EggHighlight" then v:Destroy() end
+        end
+    end
+end)
+
+-- 6. ESP Người chơi
+local EspPlayerBtn = createButton("EspPlayerBtn", 280, "ESP Player: OFF")
+local isEspPlayer = false
+
+EspPlayerBtn.MouseButton1Click:Connect(function()
+    isEspPlayer = not isEspPlayer
+    if isEspPlayer then
+        EspPlayerBtn.Text = "ESP Player: ON"
+        EspPlayerBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    else
+        EspPlayerBtn.Text = "ESP Player: OFF"
+        EspPlayerBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("PlayerHighlight") then
+                p.Character.PlayerHighlight:Destroy()
+            end
+        end
+    end
+end)
+
+-- 7. Auto Rejoin
+local AutoRejoinBtn = createButton("AutoRejoinBtn", 325, "Auto Rejoin: OFF")
+local isAutoRejoin = false
+
+AutoRejoinBtn.MouseButton1Click:Connect(function()
+    isAutoRejoin = not isAutoRejoin
+    if isAutoRejoin then
+        AutoRejoinBtn.Text = "Auto Rejoin: ON"
+        AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    else
+        AutoRejoinBtn.Text = "Auto Rejoin: OFF"
+        AutoRejoinBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
+
+-- Vòng lặp cập nhật ESP thời gian thực
+RunService.RenderStepped:Connect(function()
+    -- Xử lý ESP Trứng (Lọc các độ hiếm cao: Legendary, Mythical, Secret,...)
+    if isEspEgg then
+        pcall(function()
+            for _, obj in pairs(workspace:GetDescendants()) do
+                -- Kiểm tra tên hoặc thuộc tính liên quan đến "Egg" và phân loại độ hiếm
+                if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
+                    local rarity = obj:GetAttribute("Rarity") or obj:GetAttribute("Tier") or ""
+                    local lowerRarity = string.lower(tostring(rarity))
+                    
+                    -- Lọc các bậc từ Legendary trở lên
+                    if string.find(lowerRarity, "legendary") or string.find(lowerRarity, "mythical") or string.find(lowerRarity, "secret") or obj:FindFirstChild("Legendary") then
+                        if not obj:FindFirstChild("EggHighlight") then
+                            local hl = Instance.new("Highlight")
+                            hl.Name = "EggHighlight"
+                            hl.Adornee = obj
+                            hl.FillColor = Color3.fromRGB(255, 215, 0) -- Màu vàng cho đồ hiếm
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.Parent = obj
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    -- Xử lý ESP Player
+    if isEspPlayer then
+        pcall(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    if not player.Character:FindFirstChild("PlayerHighlight") then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "PlayerHighlight"
+                        hl.Adornee = player.Character
+                        hl.FillColor = Color3.fromRGB(255, 0, 0) -- Màu đỏ cho người chơi khác
+                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        hl.Parent = player.Character
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- Lắng nghe sự kiện bị kick / mất kết nối để Auto Rejoin
+CoreGui.PromptMessageArea.ChildAdded:Connect(function()
+    if isAutoRejoin then
+        task.wait(1)
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end)
     end
 end)
